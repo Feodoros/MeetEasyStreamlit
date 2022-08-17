@@ -8,8 +8,11 @@ import json
 CURRENT_DIR = os.path.dirname(__file__)
 DB = os.path.join(CURRENT_DIR, 'DB')
 CACHE = os.path.join(CURRENT_DIR, '.cache')
-os.mkdir(DB)
-os.mkdir(CACHE)
+
+if not os.path.exists(DB):
+    os.mkdir(DB)
+if not os.path.exists(CACHE):
+    os.mkdir(CACHE)
 
 uploaded_file = st.file_uploader("Choose a file")
 if uploaded_file is not None:
