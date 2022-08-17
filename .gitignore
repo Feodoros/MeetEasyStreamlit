@@ -1,0 +1,5 @@
+.venv/
+.vscode/
+DB/
+Decomposer/__pycache__/decomposition.cpython-39.pyc
+*/__pycache__/*
