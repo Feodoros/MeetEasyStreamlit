@@ -8,6 +8,8 @@ import json
 CURRENT_DIR = os.path.dirname(__file__)
 DB = os.path.join(CURRENT_DIR, 'DB')
 CACHE = os.path.join(CURRENT_DIR, '.cache')
+os.mkdir(DB)
+os.mkdir(CACHE)
 
 uploaded_file = st.file_uploader("Choose a file")
 if uploaded_file is not None:
@@ -17,11 +19,11 @@ if uploaded_file is not None:
     if st.button('Process file'):
         if bytes_data:
             file_path = os.path.join(CACHE, file_name)
-            with open(file_path, 'wb+') as f: 
+            with open(file_path, 'wb+') as f:
                 f.write(bytes_data)
 
-        with st.spinner('Wait for it...'):    
-            st.info('Transcribing...')  
+        with st.spinner('Wait for it...'):
+            st.info('Transcribing...')
             meeting_json = assembly_recognition.transcribe_meeting(file_path)
             os.remove(file_path)
 
