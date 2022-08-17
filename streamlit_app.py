@@ -4,6 +4,9 @@ from Decomposer import decomposition
 import streamlit as st
 import os
 import json
+import subprocess
+
+subprocess.run(["python", "-m spacy download en_core_web_sm"])
 
 CURRENT_DIR = os.path.dirname(__file__)
 DB = os.path.join(CURRENT_DIR, 'DB')
