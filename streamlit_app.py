@@ -5,6 +5,8 @@ import streamlit as st
 import os
 import json
 
+os.system('python3 -m spacy download en_core_web_sm')
+
 CURRENT_DIR = os.path.dirname(__file__)
 DB = os.path.join(CURRENT_DIR, 'DB')
 CACHE = os.path.join(CURRENT_DIR, '.cache')
