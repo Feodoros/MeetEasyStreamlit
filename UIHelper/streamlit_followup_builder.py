@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from datetime import datetime
+
 
 overall_markdown_str = ''
 
@@ -72,8 +72,7 @@ def build_followup(meeting_json):
                                    f"<a href='#tasks'>Tasks</a>",
                                    "<br>",
                                    f"<a href='#chapters'>Chapters</a>"]), unsafe_allow_html=True)
-
-    followup_2_pdf()
+    return overall_markdown_str
 
 
 def message_list_2_markdown(message_list):
@@ -91,12 +90,3 @@ def message_list_2_markdown(message_list):
         st.markdown(
             f"{message['start_time']} **{message['speaker']}**: {res_text}", unsafe_allow_html=True)
         overall_markdown_str += f"{message['start_time']} **{message['speaker']}**: {res_text}\\" + '\n'
-
-
-def followup_2_pdf():
-    filename = datetime.now().strftime("followup_%H_%M_%S") + '.md'
-    st.download_button(
-        label="Download followup",
-        data=overall_markdown_str,
-        file_name=filename,
-        mime='text/csv')

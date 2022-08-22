@@ -8,7 +8,7 @@ from pydub import AudioSegment
 
 endpoint = "https://api.assemblyai.com/v2/transcript"
 
-auth_tokens=["98d634acce314757909483d17a791819",'82532fe8a1f643d6b35ae07fb86aadee','423b657d17554cf4ad218e4f127e2aae','85948795b8174fea8b565f3934508d2f']
+auth_tokens=["98d634acce314757909483d17a791819",'82532fe8a1f643d6b35ae07fb86aadee','423b657d17554cf4ad218e4f127e2aae','85948795b8174fea8b565f3934508d2f','8309e4e43e8d47eb9b787545444dd360']
 
 headers = {
     "authorization": random.choice(auth_tokens),

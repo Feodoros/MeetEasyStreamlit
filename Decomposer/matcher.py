@@ -20,7 +20,18 @@ noun_stopwords = ['kind', 'microphone', 'screen', 'moment', 'thing', 'one','ones
 discussed_phrases = {"en":["We have discussed"], "ru":["Обсуждали", "Обсудили"]}
 summary_junk = ['Начну с того', 'В сегодняшнем обзоре я расскажу о том']
 
-patterns = {
+patterns = {'imperative' : {
+    'ru' : [{'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB',"IS_SENT_START":True, "ORTH":{"NOT_IN": verb_stopwords},'MORPH': {'IS_SUBSET': ['VerbForm=Inf','Tense=Pres']}}},
+         {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'd_object', 'RIGHT_ATTRS': {'DEP': 'dobj','POS': 'NOUN'}}],
+    'en' : [
+        [{'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB',"IS_SENT_START":True, "ORTH":{"NOT_IN": verb_stopwords},'MORPH': {'IS_SUBSET': ['VerbForm=Inf','Tense=Pres']}}},
+         {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'd_object', 'RIGHT_ATTRS': {'DEP': 'dobj','POS': 'NOUN',"LOWER":{"NOT_IN":noun_stopwords}}}
+                ],
+        [
+    {'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB', "ORTH":{"NOT_IN": verb_stopwords},'MORPH': {'IS_SUBSET':['VerbForm=Inf','Tense=Pres','VerbForm=Fin']}}},
+    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'd_object', 'RIGHT_ATTRS': {'DEP': 'dobj','POS': 'NOUN',"LOWER":{"NOT_IN":noun_stopwords}}},
+    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','LOWER':{"IN" : ['you']}}}
+]]},
             'need' : {
         
         'ru' : [
