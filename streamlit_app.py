@@ -41,7 +41,7 @@ def main():
             with st.spinner('Wait for it...'):
                 audio = AudioSegment.from_file(file_path)
                 duration = audio.duration_seconds
-                approximate_time = duration * 0.5
+                approximate_time = duration * 0.3
                 st.info(f"Approximate processing time: {str(datetime.timedelta(seconds=round(approximate_time)))}")
                 st.info('Transcribing...')
                 meeting_json = assembly_recognition.transcribe_meeting(
