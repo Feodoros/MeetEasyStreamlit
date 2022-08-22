@@ -9,7 +9,8 @@ CURRENT_DIR = os.path.dirname(__file__)
 
 def build_followup(meeting_json):
     global overall_markdown_str
-
+    overall_markdown_str = ''
+    
     st.success("Here's your followup!")
 
     chapters = meeting_json.get('chapters')

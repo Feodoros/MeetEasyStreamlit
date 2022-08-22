@@ -1,12 +1,9 @@
-from textwrap import indent
 from UIHelper import streamlit_followup_builder
 from Transcriber import assembly_recognition
 from Decomposer import decomposition
 import streamlit as st
 import os
 import json
-import timeit
-from datetime import datetime
 from markdown import markdown
 import pdfkit
 
@@ -41,7 +38,7 @@ def main():
 
             with st.spinner('Wait for it...'):
                 st.info('Transcribing...')
-                meeting_json, duration = assembly_recognition.transcribe_meeting(
+                meeting_json = assembly_recognition.transcribe_meeting(
                     file_path)
                 os.remove(file_path)
 
