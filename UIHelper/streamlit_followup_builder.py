@@ -55,9 +55,10 @@ def build_followup(meeting_json):
         """,
         unsafe_allow_html=True,
     )
-    for chapter in chapters:
+
+    for idx, chapter in enumerate(chapters):
         with st.expander(chapter['headline']):
-            overall_markdown_str += f"### {chapter['headline']}" + '\n'
+            overall_markdown_str += f"### Chapter {idx + 1}. {chapter['headline']}" + '\n'
             overall_markdown_str += "#### Chapter summary:" + '\n'
             overall_markdown_str += f"{chapter['summary']}" + '\n'
             overall_markdown_str += f"#### Chapter transcript:" + '\n'
