@@ -26,6 +26,7 @@ def build_followup(meeting_json):
     overall_markdown_str += '## Key words:' + '\n'
     key_words = meeting_json['topic']
     for kw in key_words:
+        kw = kw.capitalize()
         overall_markdown_str += f"- {kw}" + '\n'
         st.markdown(f"- {kw}")
 
@@ -38,6 +39,7 @@ def build_followup(meeting_json):
     overall_markdown_str += "## Tasks:" + '\n'
     tasks = meeting_json['task']
     for task in tasks:
+        task = task.capitalize()
         overall_markdown_str += f"- {task}" + '\n'
         st.markdown(f"- {task}")
 
