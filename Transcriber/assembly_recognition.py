@@ -6,9 +6,15 @@ import random
 from datetime import timedelta
 from pydub import AudioSegment
 
+suported_file_types = ['.3ga', '.8svx', '.aac', '.ac3', '.aif', 'aiff', '.alac', '.amr', '.ape', '.au', '.dss',
+                       '.flac', '.flv', '.m4a', '.m4b', '.m4p', '.m4r', '.mp3', '.mpga', '.ogg', '.oga', '.mogg',
+                       '.opus', '.qcp', '.tta', '.voc', '.wav', '.wma', '.wv', '.webm', '.MTS', '.M2TS', '.TS', '.mov',
+                       '.mp2', '.mp4', '.m4p', '.m4v', '.mxf']
+
 endpoint = "https://api.assemblyai.com/v2/transcript"
 
-auth_tokens=["98d634acce314757909483d17a791819",'82532fe8a1f643d6b35ae07fb86aadee','423b657d17554cf4ad218e4f127e2aae','85948795b8174fea8b565f3934508d2f','8309e4e43e8d47eb9b787545444dd360']
+auth_tokens = ["98d634acce314757909483d17a791819", '82532fe8a1f643d6b35ae07fb86aadee', '423b657d17554cf4ad218e4f127e2aae',
+               '85948795b8174fea8b565f3934508d2f', '8309e4e43e8d47eb9b787545444dd360', '072eedb31d8146e49c21534a73ce8779']
 
 headers = {
     "authorization": random.choice(auth_tokens),
@@ -17,17 +23,22 @@ headers = {
 
 
 def transcribe_meeting(recording_path):
-    print('Convert file to ogg format')
-    new_name = secrets.token_hex(16) + '.ogg'
-    audio_in = AudioSegment.from_file(recording_path)
-    audio_in.export(new_name, format='ogg', codec='libopus')
+    new_name = ''
+    filename, file_extension = os.path.splitext(recording_path)
+    if (file_extension not in suported_file_types):
+        print('Convert file to ogg format')
+        new_name = secrets.token_hex(16) + '.ogg'
+        audio_in = AudioSegment.from_file(recording_path)
+        audio_in.export(new_name, format='ogg', codec='libopus')
+        recording_path = new_name
 
     print('Uploading file to cloud')
     response = requests.post('https://api.assemblyai.com/v2/upload',
                              headers=headers,
-                             data=read_file_by_chunk(new_name))
+                             data=read_file_by_chunk(recording_path))
 
-    json = {"audio_url": response.json()['upload_url'], "speaker_labels": True, 'auto_chapters': True}
+    json = {"audio_url": response.json()['upload_url'], "speaker_labels": True,
+            'auto_chapters': True, "auto_highlights": True, "entity_detection": True}
     response = requests.post(endpoint, json=json, headers=headers)
 
     print('Transcribing...')
@@ -43,7 +54,9 @@ def transcribe_meeting(recording_path):
 
         time.sleep(3)
 
-    os.remove(new_name)
+    if (new_name):
+        os.remove(new_name)
+
     return process_transcript_json(polling_response.json())
 
 
