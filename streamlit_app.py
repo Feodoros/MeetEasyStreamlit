@@ -27,6 +27,11 @@ def main():
     if "full_markdown" not in st.session_state:
         st.session_state.full_markdown = ''
 
+    with st.expander("How to use"):
+        st.write("1) Download a recording of your meeting")
+        st.write("2) Get a short sammari, task list, and full transcript of the meeting")
+        st.write("3) Record processing time: 30 sec - 15 minutes, depending on file size")
+
     uploaded_file = st.file_uploader("Choose a file")
     if uploaded_file is not None:
         bytes_data = uploaded_file.getvalue()
@@ -98,6 +103,9 @@ def download_followup(full_markdown, meeting_json):
             file_name=filename + '.pdf',
             mime='application/octet-stream')
         os.remove(filename + '.pdf')
+
+    st.markdown("**MeetEasy** - Perfect AI assistant for your meeting.")
+    st.markdown("Make your meetings **more productive.**")
 
 
 if __name__ == "__main__":
