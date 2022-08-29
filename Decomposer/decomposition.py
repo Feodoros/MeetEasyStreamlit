@@ -41,11 +41,11 @@ def decompose(transcript_json):
     dep_matches = dep_matcher(doc)
 
     transcript_json['topic'] = functions_matcher[lang]['topic'](text)
-    transcript_json['summary'] = functions_matcher[lang]['summary'](
-        text, doc, nlp, dep_matches, lang)
+#     transcript_json['summary'] = functions_matcher[lang]['summary'](
+#         text, doc, nlp, dep_matches, lang)
     transcript_json['task'] = functions_matcher[lang]['task'](transcript_json, doc, nlp, dep_matcher, dep_matches)
-    transcript_json['colored'] = {"BEEN DONE": get_BEEN_DONE(text, doc, nlp, dep_matches),
-                                  "TODO": get_TODO(text, doc, nlp, dep_matches)}
+#     transcript_json['colored'] = {"BEEN DONE": get_BEEN_DONE(text, doc, nlp, dep_matches),
+#                                   "TODO": get_TODO(text, doc, nlp, dep_matches)}
     
     transcript_json = get_assembly_summary(transcript_json, nlp, dep_matcher, lang)
 
