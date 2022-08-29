@@ -136,7 +136,7 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
             chapter['headline'] = chapter['gist']
         start_id = message_list_range(transcript_json['message_list'], timedelta(milliseconds=chapter['start']), 'start_time')
         end_id = message_list_range(transcript_json['message_list'], timedelta(milliseconds=chapter['end']), 'end_time')
-        chapter['message_list'] = transcript_json['message_list'][start_id:end_id]
+        chapter['message_list'] = transcript_json['message_list'][start_id:end_id+1]
         for message in chapter['message_list']:
             doc = nlp(message['text'])
             dep_matches = dep_matcher(doc)
