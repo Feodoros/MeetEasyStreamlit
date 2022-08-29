@@ -15,16 +15,16 @@ rus_stopwords = ['аа', 'слушай', "говоришь", 'клево', 'ща
                  'приду', 'секунду', 'разрешаю', 'нет', "типа", "угу", "ну", "чето", "да", "ааа"]
 pron_stopwords = ["нибудь", "который", "я",
                   "ты", "он", "она", "они", "кое", "что", "это"]
-verb_stopwords = ['told', 'said', 'had', 'loved', 'see', 'have', 'need','want', 'use','imagine', 'miss','tell','say']
-noun_stopwords = ['kind', 'microphone', 'screen', 'moment', 'thing', 'one','ones','what', 'that', 'it','kinds','sorts']
+verb_stopwords = ['told', 'said', 'had', 'loved', 'see', 'have', 'need','want', 'use','imagine', 'miss','tell','say','expect', 'consider']
+noun_stopwords = ['kind', 'microphone', 'screen', 'moment', 'thing', 'one','ones','what', 'that', 'it','kinds','sorts','which','mic','microphones', 'minute', 'minutes', 'whatever']
 discussed_phrases = {"en":["We have discussed"], "ru":["Обсуждали", "Обсудили"]}
 summary_junk = ['Начну с того', 'В сегодняшнем обзоре я расскажу о том']
 
 patterns = {'imperative' : {
-    'ru' : [{'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB',"IS_SENT_START":True, "LOWER":{"NOT_IN": verb_stopwords},'MORPH': {'IS_SUBSET': ['VerbForm=Inf','Tense=Pres']}}},
+    'ru' : [{'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {"LOWER":{"NOT_IN": verb_stopwords},'POS': 'VERB',"IS_SENT_START":True, 'MORPH': {'IS_SUBSET': ['VerbForm=Inf','Tense=Pres']}}},
          {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'd_object', 'RIGHT_ATTRS': {'DEP': 'dobj','POS': 'NOUN'}}],
     'en' : [
-        [{'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB',"IS_SENT_START":True, "ORTH":{"NOT_IN": verb_stopwords},'MORPH': {'IS_SUBSET': ['VerbForm=Inf','Tense=Pres']}}},
+        [{'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB',"IS_SENT_START":True, "LOWER":{"NOT_IN": verb_stopwords},'MORPH': {'IS_SUBSET': ['VerbForm=Inf','Tense=Pres']}}},
          {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'd_object', 'RIGHT_ATTRS': {'DEP': 'dobj','POS': 'NOUN',"LOWER":{"NOT_IN":noun_stopwords}}}
 #                 ],
 #         [
@@ -123,13 +123,14 @@ patterns = {'imperative' : {
                 {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'x_comp', 'RIGHT_ATTRS': {'DEP': 'xcomp','POS': 'VERB',"LOWER":{"NOT_IN": verb_stopwords}}},
                 {'LEFT_ID': 'x_comp', 'REL_OP': '>', 'RIGHT_ID': 'part', 'RIGHT_ATTRS': {'DEP': 'aux','POS': 'PART'}},
                 {'LEFT_ID': 'x_comp', 'REL_OP': '>', 'RIGHT_ID': 'c_comp', 'RIGHT_ATTRS': {'DEP': {'IN' : ['ccomp','dobj']}, 'POS': {"IN":["PRON", "NOUN", "VERB"]},"LOWER": {"NOT_IN":noun_stopwords}}},
-                {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','LOWER': {"NOT_IN":["you","it"]}, 'POS': {"IN":["PRON", "PROPN"]}}},
+                {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','LOWER': {"NOT_IN":["you","it","they"]}, 'POS': {"IN":["PRON", "PROPN"]}}},
                 {'LEFT_ID': 'mod', 'REL_OP': ';', 'RIGHT_ID': 'any', 'RIGHT_ATTRS': {'LOWER':{"NOT_IN" : ["n't", "not"]}}}],
+            
                 [{'RIGHT_ID': 'mod', 'RIGHT_ATTRS': {"LOWER": {"IN": ["thinking","planning","going"]}}},
                 {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'x_comp', 'RIGHT_ATTRS': {'DEP': 'xcomp','POS': 'VERB',"LOWER":{"NOT_IN": verb_stopwords}}},
                 {'LEFT_ID': 'x_comp', 'REL_OP': '>', 'RIGHT_ID': 'part', 'RIGHT_ATTRS': {'DEP': 'aux','POS': 'PART'}},
                 {'LEFT_ID': 'x_comp', 'REL_OP': '>', 'RIGHT_ID': 'c_comp', 'RIGHT_ATTRS': {'DEP': {'IN' : ['ccomp','dobj']}, 'POS': {"IN":["PRON", "NOUN", "VERB"]},"LOWER": {"NOT_IN":noun_stopwords}}},
-                {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','LOWER': {"NOT_IN":["you","it"]}, 'POS': {"IN":["PRON"]}}},
+                {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','LOWER': {"NOT_IN":["you","it","they"]}, 'POS': {"IN":["PRON"]}}},
                 {'LEFT_ID': 'mod', 'REL_OP': ';', 'RIGHT_ID': 'aux', 'RIGHT_ATTRS': {'DEP': 'aux','POS': 'AUX'}},
                 {'LEFT_ID': 'mod', 'REL_OP': ';', 'RIGHT_ID': 'any', 'RIGHT_ATTRS': {'LOWER':{"NOT_IN" : ["n't", "not"]}}}]
                ]
@@ -249,7 +250,7 @@ patterns = {'imperative' : {
             
     {'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB',"LOWER":{"NOT_IN":verb_stopwords}}},
     {'LEFT_ID': 'verb', 'REL_OP': ';', 'RIGHT_ID': 'aux', 'RIGHT_ATTRS': {'DEP': 'aux','MORPH': 'VerbForm=Fin'}},
-    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','POS': {"IN":['PRON',"PROPN"]},"LOWER": {"NOT_IN": ["it"]}}},
+    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','POS': {"IN":['PRON',"PROPN"]},"LOWER": {"NOT_IN": noun_stopwords}}},
     {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'd_object', 'RIGHT_ATTRS': {'DEP': 'dobj','POS': {"NOT_IN":['NOUN',"PROPN"]},"LOWER":{"NOT_IN":noun_stopwords}}}
                 ]},
     
@@ -265,7 +266,7 @@ patterns = {'imperative' : {
             
     {'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'POS': 'VERB',"LOWER":{"NOT_IN":verb_stopwords}}},
     {'LEFT_ID': 'verb', 'REL_OP': ';', 'RIGHT_ID': 'aux', 'RIGHT_ATTRS': {'DEP': 'aux','MORPH': 'VerbForm=Fin'}},
-    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','POS': {"IN":['PRON',"PROPN"]},"LOWER": {"NOT_IN": ["it"]}}},
+    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','POS': {"IN":['PRON',"PROPN"]},"LOWER": {"NOT_IN": noun_stopwords}}},
     {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'd_object', 'RIGHT_ATTRS': {'DEP': 'dobj','POS': {"IN":['NOUN',"PROPN"]},"LOWER":{"NOT_IN":noun_stopwords}}}
                 ]},
     
