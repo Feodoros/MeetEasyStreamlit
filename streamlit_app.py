@@ -27,10 +27,10 @@ def main():
     if "full_markdown" not in st.session_state:
         st.session_state.full_markdown = ''
 
-    with st.expander("How to use"):
-        st.write("1) Download a recording of your meeting")
-        st.write("2) Get a short sammari, task list, and full transcript of the meeting")
-        st.write("3) Record processing time: 30 sec - 15 minutes, depending on file size")
+    with st.expander("How to use", True):
+        st.write("1) Upload a recording of your meeting")
+        st.write("2) Get a short summary, task list, and full transcript of the meeting")
+        st.write("3) Processing time: 30 sec - 15 minutes, depending on file size")
 
     uploaded_file = st.file_uploader("Choose a file")
     if uploaded_file is not None:
@@ -46,7 +46,7 @@ def main():
             with st.spinner('Wait for it...'):
                 audio = AudioSegment.from_file(file_path)
                 duration = audio.duration_seconds
-                approximate_time = duration * 0.3
+                approximate_time = duration * 0.4
                 st.info(
                     f"Approximate processing time: {str(datetime.timedelta(seconds=round(approximate_time)))}")
                 st.info('Transcribing...')
