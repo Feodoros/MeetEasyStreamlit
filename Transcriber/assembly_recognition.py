@@ -22,17 +22,8 @@ headers = {
 }
 
 
-def transcribe_meeting(recording_path):
-    new_name = ''
-    filename, file_extension = os.path.splitext(recording_path)
-    if (file_extension not in suported_file_types):
-        print('Convert file to ogg format')
-        new_name = secrets.token_hex(16) + '.ogg'
-        audio_in = AudioSegment.from_file(recording_path)
-        audio_in.export(new_name, format='ogg', codec='libopus')
-        recording_path = new_name
-
-    print('Uploading file to cloud')
+def post_audio(headers, recording_path):
+    
     response = requests.post('https://api.assemblyai.com/v2/upload',
                              headers=headers,
                              data=read_file_by_chunk(recording_path))
@@ -51,13 +42,118 @@ def transcribe_meeting(recording_path):
 
         if status == 'completed':
             print('Transcribing done.')
+            
+        elif status == 'error':
+            
+            if polling_response.json()['error']=="Insufficient Funds":
+                
+                auth_tokens.remove(headers['authorization'])
+                
+                headers = {"authorization": random.choice(auth_tokens), "content-type": "application/json"}
+                
+                polling_response = post_audio(headers)
+            else:
+                print('Transcribing failed with the {} error.'.format(polling_response.json()['error']))
+                
 
         time.sleep(3)
+        
+    return polling_response
+
+
+def transcribe_meeting(recording_path):
+    new_name = ''
+    filename, file_extension = os.path.splitext(recording_path)
+    if (file_extension not in suported_file_types):
+        print('Convert file to ogg format')
+        new_name = secrets.token_hex(16) + '.ogg'
+        audio_in = AudioSegment.from_file(recording_path)
+        audio_in.export(new_name, format='ogg', codec='libopus')
+        recording_path = new_name
+
+    print('Uploading file to cloud')
+    polling_response = post_audio(headers, recording_path)
+#     response = requests.post('https://api.assemblyai.com/v2/upload',
+#                              headers=headers,
+#                              data=read_file_by_chunk(recording_path))
+
+#     json = {"audio_url": response.json()['upload_url'], "speaker_labels": True,
+#             'auto_chapters': True, "auto_highlights": True, "entity_detection": True}
+#     response = requests.post(endpoint, json=json, headers=headers)
+
+#     print('Transcribing...')
+#     status = 'submitted'
+#     while status != 'completed':
+#         print(status)
+#         polling_response = requests.get(
+#             endpoint+'/'+response.json()['id'], headers=headers)
+#         status = polling_response.json()['status']
+
+#         if status == 'completed':
+#             print('Transcribing done.')
+            
+#         elif status == 'error':
+            
+#             if polling_response.json()['status']=="Insufficient Funds":
+                
+#                 auth_tokens.remove(headers['authorization'])
+                
+#                 headers = {"authorization": random.choice(auth_tokens), "content-type": "application/json"}
+            
+#                 pass
+
+#         time.sleep(3)
 
     if (new_name):
         os.remove(new_name)
 
     return process_transcript_json(polling_response.json())
+# def transcribe_meeting(recording_path):
+#     new_name = ''
+#     filename, file_extension = os.path.splitext(recording_path)
+#     if (file_extension not in suported_file_types):
+#         print('Convert file to ogg format')
+#         new_name = secrets.token_hex(16) + '.ogg'
+#         audio_in = AudioSegment.from_file(recording_path)
+#         audio_in.export(new_name, format='ogg', codec='libopus')
+#         recording_path = new_name
+
+#     print('Uploading file to cloud')
+#     response = requests.post('https://api.assemblyai.com/v2/upload',
+#                              headers=headers,
+#                              data=read_file_by_chunk(recording_path))
+
+#     json = {"audio_url": response.json()['upload_url'], "speaker_labels": True,
+#             'auto_chapters': True, "auto_highlights": True, "entity_detection": True}
+#     response = requests.post(endpoint, json=json, headers=headers)
+
+#     print('Transcribing...')
+#     status = 'submitted'
+#     while status != 'completed':
+#         print(status)
+#         polling_response = requests.get(
+#             endpoint+'/'+response.json()['id'], headers=headers)
+#         status = polling_response.json()['status']
+
+#         if status == 'completed':
+#             print('Transcribing done.')
+            
+#         elif status == 'error':
+            
+#             if polling_response.json()['status']=="Insufficient Funds":
+                
+#                 auth_tokens.remove(headers['authorization'])
+                
+#                 headers = {"authorization": random.choice(auth_tokens), "content-type": "application/json"}
+            
+#                 pass
+
+#         time.sleep(3)
+
+#     if (new_name):
+#         os.remove(new_name)
+
+#     return process_transcript_json(polling_response.json())
 
 
 def process_transcript_json(resp_json):
