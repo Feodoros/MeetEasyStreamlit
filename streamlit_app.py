@@ -21,6 +21,8 @@ if not os.path.exists(CACHE):
 
 
 def main():
+    st.set_page_config(page_title="MyMeet · Upload", page_icon="🌿")
+
     if "meeting_json" not in st.session_state:
         st.session_state.meeting_json = {}
 
