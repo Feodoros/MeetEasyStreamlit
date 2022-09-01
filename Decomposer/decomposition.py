@@ -17,7 +17,7 @@ functions_matcher = {'ru': {'topic': get_keywords,
                             },
                      'en': {'topic': get_en_keywords,
                             'summary': get_en_summary,
-                            'task': get_tasks,
+                            'task': get_personal_tasks,
                             }}
 
 

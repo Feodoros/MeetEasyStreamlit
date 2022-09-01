@@ -93,7 +93,7 @@ def get_personal_tasks(transcript_json, doc, nlp, dep_matcher, dep_matches):
             if nlp.vocab[pattern_name].text in ['weekday', 'time', 'remind']:
                 tasks.append(join_dependant_tokens(0, doc, matches).lower().replace('.',''))
 
-        tasks_by_speaker[key] = tasks
+        tasks_by_speaker[key] = list(set(tasks))
         
     return tasks_by_speaker
 
