@@ -25,14 +25,14 @@ def process_json(transcript_json):
 def split_text_by_speaker(transcript_json):
     
     texts_by_speaker = defaultdict(str)
-    if "speaker" in transcript_json['message_list'][0].keys():
+#     if "speaker" in transcript_json['message_list'][0].keys():
 
-        for message in transcript_json['message_list']:
-            texts_by_speaker[message['speaker']]+=message['text']
+    for message in transcript_json['message_list']:
+        texts_by_speaker[message['speaker']]+=message['text']
 
-    else:
-        #texts_by_speaker[speaker] = process_json(transcript_json)
-        pass
+#     else:
+#         #texts_by_speaker[speaker] = process_json(transcript_json)
+#         pass
                 
     return texts_by_speaker
 
@@ -78,6 +78,9 @@ def get_personal_tasks(transcript_json, doc, nlp, dep_matcher, dep_matches):
         for i, match in enumerate(dep_matches):
             pattern_name = match[0]
             matches = match[1]
+            
+            if nlp.vocab[pattern_name].text == 'imperative':
+                tasks.append(doc[matches[0]].text.lower()+' '+join_dependant_tokens(1, doc, matches))
             
             if nlp.vocab[pattern_name].text in ['task','need','want',"could_you"]:
                 
