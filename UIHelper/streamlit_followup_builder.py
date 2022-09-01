@@ -30,18 +30,30 @@ def build_followup(meeting_json):
         overall_markdown_str += f"- {kw}" + '\n'
         st.markdown(f"- {kw}")
 
-    st.markdown("## Summary:")
     overall_markdown_str += "## Summary:" + '\n'
-    st.write(overall_summary)
     overall_markdown_str += overall_summary + '\n'
 
-    st.markdown("## Tasks:")
+    if(len(overall_summary) >= 400):
+        with st.expander("Summary"):
+            st.write(overall_summary)
+    else:
+        st.markdown("## Summary:")
+        st.write(overall_summary)
+
     overall_markdown_str += "## Tasks:" + '\n'
     tasks = meeting_json['task']
-    for task in tasks:
-        task = task.capitalize()
-        overall_markdown_str += f"- {task}" + '\n'
-        st.markdown(f"- {task}")
+    if (len(tasks) >= 5):
+        with st.expander("Tasks"):
+            for task in tasks:
+                task = task.capitalize()
+                overall_markdown_str += f"- {task}" + '\n'
+                st.markdown(f"- {task}")
+    else:
+        st.markdown("## Tasks:")
+        for task in tasks:
+            task = task.capitalize()
+            overall_markdown_str += f"- {task}" + '\n'
+            st.markdown(f"- {task}")
 
     st.markdown("## Chapters:")
     overall_markdown_str += "## Chapters:" + '\n'
