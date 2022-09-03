@@ -50,15 +50,15 @@ def build_followup(meeting_json):
                     for speaker in tasks.keys():
                         for task in tasks[speaker]:
                             task = task.capitalize()
-                            overall_markdown_str += f"- {task} (speaker {speaker})" + '\n'
-                            st.markdown(f"- {task} (speaker {speaker})")
+                            overall_markdown_str += f"- {task} (assigned by speaker {speaker})" + '\n'
+                            st.markdown(f"- {task} (assigned by speaker {speaker})")
             else:
                 st.markdown("## Tasks:")
                 for speaker in tasks.keys():
                     for task in tasks[speaker]:
                         task = task.capitalize()
-                        overall_markdown_str += f"- {task} (speaker {speaker})" + '\n'
-                        st.markdown(f"- {task} (speaker {speaker})")
+                        overall_markdown_str += f"- {task} (assigned by speaker {speaker})" + '\n'
+                        st.markdown(f"- {task} (assigned by speaker {speaker})")
         else:
             tasks = meeting_json['task']['A']
             raise ValueError('Only one speaker.')
