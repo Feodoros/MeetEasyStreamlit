@@ -29,7 +29,7 @@ def post_audio(headers, recording_path):
                              data=read_file_by_chunk(recording_path))
 
     json = {"audio_url": response.json()['upload_url'], "speaker_labels": True,
-            'auto_chapters': True, "auto_highlights": True, "entity_detection": True}
+            'auto_chapters': True, "auto_highlights": True}
     response = requests.post(endpoint, json=json, headers=headers)
 
     print('Transcribing...')
