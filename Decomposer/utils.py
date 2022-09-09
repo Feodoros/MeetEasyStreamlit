@@ -190,7 +190,7 @@ def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, model, tokenizer):
     topic = join_phrases(list(set(discussed)), lang, upper=False)
     
     if discussed:
-        return [{"summary" : big_regex.sub(random.choice(discussed_phrases[lang]), random.choice(discussed_phrases[lang])+' '+topic+ ' '+summary), "headline":'headline', "gist":topic.capitaize(),"start":0,"end":0}]
+        return [{"summary" : big_regex.sub(random.choice(discussed_phrases[lang]), random.choice(discussed_phrases[lang])+' '+topic+ ' '+summary), "headline":'headline', "gist":topic.capitalize(),"start":0,"end":0}]
     
     return [{"summary" : big_regex.sub(random.choice(discussed_phrases[lang]), summary), "headline":'headline', "gist":"1","start":0,"end":0}]
 
