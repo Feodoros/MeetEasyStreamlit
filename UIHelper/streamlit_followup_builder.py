@@ -22,13 +22,14 @@ def build_followup(meeting_json):
     for chapter in chapters:
         overall_summary += chapter['summary'] + ' '
 
-    st.markdown('## Key words:')
-    overall_markdown_str += '## Key words:' + '\n'
-    key_words = meeting_json['topic']
-    for kw in key_words:
-        kw = kw.capitalize()
-        overall_markdown_str += f"- {kw}" + '\n'
-        st.markdown(f"- {kw}")
+    if meeting_json['topic']:
+        st.markdown('## Key words:')
+        overall_markdown_str += '## Key words:' + '\n'
+        key_words = meeting_json['topic']
+        for kw in key_words:
+            kw = kw.capitalize()
+            overall_markdown_str += f"- {kw}" + '\n'
+            st.markdown(f"- {kw}")
 
     overall_markdown_str += "## Summary:" + '\n'
     overall_markdown_str += overall_summary + '\n'

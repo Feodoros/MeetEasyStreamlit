@@ -1,5 +1,5 @@
 from UIHelper import streamlit_followup_builder
-from Transcriber import assembly_recognition
+from Transcriber import assembly_recognition, yandex_transcription
 from Decomposer import decomposition
 from pydub import AudioSegment
 import datetime
@@ -8,6 +8,8 @@ import os
 import json
 from markdown import markdown
 import pdfkit
+import subprocess
+from Langdentifier.lang_identification import *
 
 
 CURRENT_DIR = os.path.dirname(__file__)
@@ -51,15 +53,35 @@ def main():
                 approximate_time = duration * 0.4
                 st.info(
                     f"Approximate processing time: {str(datetime.timedelta(seconds=round(approximate_time)))}")
+                
+                st.info('Identifying the language...')
+                dotsplit = file_path.split('.')
+                shortened_path = ".".join(dotsplit[:-1])+'_shortened.'+dotsplit[-1]
+                subprocess.call(['ffmpeg','-n', '-i', file_path,'-to','20','-c', 'copy', shortened_path])
+                if dotsplit[-1]!='wav':
+                    wav_path = ".".join(shortened_path.split('.')[:-1]+['wav'])
+                    subprocess.call(['ffmpeg','-n', '-i', shortened_path,'-acodec','pcm_u8','-ar', '16000', wav_path])
+
+                    wav = read_audio(wav_path, sampling_rate=SAMPLING_RATE)
+                    os.remove(wav_path)
+                else:
+                    wav = read_audio(shortened_path, sampling_rate=SAMPLING_RATE)
+                lang = get_language(wav, model)
+                os.remove(shortened_path)
+                
                 st.info('Transcribing...')
-                meeting_json = assembly_recognition.transcribe_meeting(
+                if lang=='ru':
+                    meeting_json = yandex_transcription.transcribe_meeting(file_path)
+                else:
+                    lang='en'
+                    meeting_json = assembly_recognition.transcribe_meeting(
                     file_path)
                 os.remove(file_path)
 
                 # Decompose meeting:
                 # Summary, Tasks, Reminders, plans, etc
                 st.info('Decomposing...')
-                meeting_json = decomposition.decompose(meeting_json)
+                meeting_json = decomposition.decompose(meeting_json, lang)
 
                 with open(os.path.join(DB, f'{file_name}.json'), 'w+', encoding='utf-8') as f:
                     json.dump(meeting_json, f, ensure_ascii=False)
