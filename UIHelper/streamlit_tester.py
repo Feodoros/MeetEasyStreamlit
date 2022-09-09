@@ -3,7 +3,7 @@ import os
 import streamlit_followup_builder
 
 DIR = os.path.dirname(__file__)
-DATA_DIR = os.path.join(DIR, 'data')
+DATA_DIR = os.path.join(DIR, '../../Transcriber')
 
 test_followup = os.path.join(DATA_DIR, 'English_0.wav.json')
 

@@ -137,9 +137,12 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
     for i, chapter in enumerate(transcript_json['chapters']):
         if i < 3: 
             chapter['headline'] = chapter['gist']
-        start_id = message_list_range(transcript_json['message_list'], timedelta(milliseconds=chapter['start']), 'start_time')
-        end_id = message_list_range(transcript_json['message_list'], timedelta(milliseconds=chapter['end']), 'end_time')
-        chapter['message_list'] = transcript_json['message_list'][start_id:end_id+1]
+        if chapter['start']:
+            start_id = message_list_range(transcript_json['message_list'], timedelta(milliseconds=chapter['start']), 'start_time')
+            end_id = message_list_range(transcript_json['message_list'], timedelta(milliseconds=chapter['end']), 'end_time')
+            chapter['message_list'] = transcript_json['message_list'][start_id:end_id+1]
+        else:
+            chapter['message_list'] = transcript_json['message_list']
         for message in chapter['message_list']:
             doc = nlp(message['text'])
             dep_matches = dep_matcher(doc)
@@ -184,11 +187,12 @@ def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, model, tokenizer):
 )[0]
     summary = tokenizer.decode(output_ids, skip_special_tokens=True)
     big_regex = re.compile('|'.join(map(re.escape, summary_junk)))
+    topic = join_phrases(list(set(discussed)), lang, upper=False)
     
     if discussed:
-        return big_regex.sub(random.choice(discussed_phrases[lang]), random.choice(discussed_phrases[lang])+' '+join_phrases(list(set(discussed)), lang,upper=False) + ' '+summary)
+        return [{"summary" : big_regex.sub(random.choice(discussed_phrases[lang]), random.choice(discussed_phrases[lang])+' '+topic+ ' '+summary), "headline":'headline', "gist":topic.capitaize(),"start":0,"end":0}]
     
-    return big_regex.sub(random.choice(discussed_phrases[lang]), summary)
+    return [{"summary" : big_regex.sub(random.choice(discussed_phrases[lang]), summary), "headline":'headline', "gist":"1","start":0,"end":0}]
 
 
 def get_en_summary(text, doc, nlp, dep_matches, lang):
