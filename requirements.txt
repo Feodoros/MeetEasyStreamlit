@@ -12,4 +12,4 @@ torchaudio
 pdfkit
 markdown
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.3.0/en_core_web_sm-3.3.0.tar.gz
-https://github.com/explosion/spacy-models/releases/download/ru_core_news_lg-3.3.0/ru_core_news_lg-3.3.0.tar.gz
+https://github.com/explosion/spacy-models/releases/download/ru_core_news_lg-3.4.0/ru_core_news_lg-3.4.0.tar.gz
