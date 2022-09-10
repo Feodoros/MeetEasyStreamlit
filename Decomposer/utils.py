@@ -185,6 +185,8 @@ def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, model, tokenizer):
     input_ids=input_ids,
     no_repeat_ngram_size=4
 )[0]
+    del input_ids
+    del model
     summary = tokenizer.decode(output_ids, skip_special_tokens=True)
     big_regex = re.compile('|'.join(map(re.escape, summary_junk)))
     topic = join_phrases(list(set(discussed)), lang, upper=False)
