@@ -4,7 +4,7 @@ pyinflect
 pymorphy2
 keybert
 langdetect
-transformers==4.20.1
+transformers==4.9.0
 streamlit
 pydub
 boto3==1.24.7
