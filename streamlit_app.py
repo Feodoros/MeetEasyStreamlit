@@ -9,7 +9,7 @@ import json
 from markdown import markdown
 import pdfkit
 import subprocess
-from Langdentifier.lang_identification import model, get_language, read_audio 
+from Langdentifier.lang_identification import model, get_language, read_audio, SAMPLING_RATE 
 
 
 CURRENT_DIR = os.path.dirname(__file__)
