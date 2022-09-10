@@ -1,21 +1,9 @@
-import streamlit as st
 from Decomposer.utils import *
 from Decomposer.matcher import *
-from transformers import MBartTokenizer, MBartForConditionalGeneration
 import spacy
 from spacy.matcher import Matcher, DependencyMatcher
 from langdetect import detect
 import pyinflect
-
-@st.cache
-def load_model():
-    summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
-    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
-    print('loaded tokenizer')
-    summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
-    print('loaded model')
-    return (tokenizer, summary_model)
-
 
 functions_matcher = {'ru': {'topic': get_keywords,
                             'summary': get_mbart_ru_summary,

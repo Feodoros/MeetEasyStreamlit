@@ -5,6 +5,18 @@ import random
 from keybert import KeyBERT
 from collections import defaultdict
 from Decomposer.matcher import *
+import streamlit as st
+from transformers import MBartTokenizer, MBartForConditionalGeneration
+
+@st.cache
+def load_model():
+    summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
+    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
+    st.info('loaded tokenizer')
+    summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
+    st.info('loaded model')
+    return (tokenizer, summary_model)
+
 
 kw_model = KeyBERT()
 morph = pymorphy2.MorphAnalyzer()
@@ -174,6 +186,7 @@ def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, model, tokenizer):
             
             discussed.append(join_dependant_tokens(1, doc, matches))
 
+    st.info('got topic')
     input_ids = tokenizer(
     [text],
     max_length=600,
@@ -181,10 +194,15 @@ def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, model, tokenizer):
     return_tensors="pt",
 )["input_ids"]
     
+    st.info('tokenized input')
+    
     output_ids = model.generate(
     input_ids=input_ids,
     no_repeat_ngram_size=4
 )[0]
+    
+    st.info('predicted summary')
+    
     del input_ids
     del model
     summary = tokenizer.decode(output_ids, skip_special_tokens=True)
