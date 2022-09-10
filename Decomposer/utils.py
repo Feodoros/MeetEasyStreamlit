@@ -8,16 +8,6 @@ from Decomposer.matcher import *
 import streamlit as st
 from transformers import MBartTokenizer, MBartForConditionalGeneration
 
-@st.cache
-def load_model():
-    summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
-    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
-    st.info('loaded tokenizer')
-    summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
-    st.info('loaded model')
-    return (tokenizer, summary_model)
-
-
 kw_model = KeyBERT()
 morph = pymorphy2.MorphAnalyzer()
 
@@ -175,7 +165,48 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
     return transcript_json
 
 
-def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, model, tokenizer):
+# def load_model(suppress_st_warning=True):
+#     summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
+#     tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
+#     st.info('loaded tokenizer')
+#     summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
+#     st.info('loaded model')
+#     return (tokenizer, summary_model)
+
+@st.cache
+def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang):
+    
+    summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
+    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
+    st.info('loaded tokenizer')
+    
+    input_ids = tokenizer(
+    [text],
+    max_length=600,
+    truncation=True,
+    return_tensors="pt",
+)["input_ids"]
+    
+    st.info('tokenized input')
+    del tokenizer
+    
+    summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
+    st.info('loaded model')
+    
+    output_ids = model.generate(
+    input_ids=input_ids,
+    no_repeat_ngram_size=4
+)[0]
+    
+    st.info('predicted summary')
+    
+    del input_ids
+    del model
+    
+    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
+    st.info('loaded tokenizer')
+    summary = tokenizer.decode(output_ids, skip_special_tokens=True)
+    del tokenizer
     
     discussed = []
     
@@ -187,25 +218,6 @@ def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, model, tokenizer):
             discussed.append(join_dependant_tokens(1, doc, matches))
 
     st.info('got topic')
-    input_ids = tokenizer(
-    [text],
-    max_length=600,
-    truncation=True,
-    return_tensors="pt",
-)["input_ids"]
-    
-    st.info('tokenized input')
-    
-    output_ids = model.generate(
-    input_ids=input_ids,
-    no_repeat_ngram_size=4
-)[0]
-    
-    st.info('predicted summary')
-    
-    del input_ids
-    del model
-    summary = tokenizer.decode(output_ids, skip_special_tokens=True)
     big_regex = re.compile('|'.join(map(re.escape, summary_junk)))
     topic = join_phrases(list(set(discussed)), lang, upper=False)
     
