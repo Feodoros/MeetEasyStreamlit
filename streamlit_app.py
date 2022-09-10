@@ -68,7 +68,6 @@ def main():
                     wav = read_audio(shortened_path, sampling_rate=SAMPLING_RATE)
                 lang = get_language(wav, model)
                 os.remove(shortened_path)
-                del model
                 
                 st.info('Transcribing...')
                 if lang=='ru':
