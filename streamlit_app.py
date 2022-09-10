@@ -9,17 +9,7 @@ import json
 from markdown import markdown
 import pdfkit
 import subprocess
-import torch
-import subprocess
-
-torch.set_num_threads(1)
-SAMPLING_RATE = 16000
-model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
-                              model='silero_lang_detector',
-                              force_reload=False,
-                              onnx=False)
-
-get_language, read_audio = utils
+from Langdentifier.lang_identification import *
 
 
 CURRENT_DIR = os.path.dirname(__file__)
@@ -78,7 +68,7 @@ def main():
                     wav = read_audio(shortened_path, sampling_rate=SAMPLING_RATE)
                 lang = get_language(wav, model)
                 os.remove(shortened_path)
-                del model
+                model = None
                 
                 st.info('Transcribing...')
                 if lang=='ru':
