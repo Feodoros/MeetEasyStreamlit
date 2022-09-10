@@ -37,8 +37,8 @@ def decompose(transcript_json, lang):
     transcript_json['topic'] = functions_matcher[lang]['topic'](text)
     transcript_json['task'] = functions_matcher[lang]['task'](transcript_json, doc, nlp, dep_matcher, dep_matches)
     if lang=='ru':
-        tokenizer, summary_model = load_model()
-        transcript_json['chapters'] = get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, summary_model, tokenizer)
+#         tokenizer, summary_model = load_model()
+        transcript_json['chapters'] = get_mbart_ru_summary(text, doc, nlp, dep_matches, lang)#, summary_model, tokenizer)
     transcript_json = get_assembly_summary(transcript_json, nlp, dep_matcher, lang)
 #         text, doc, nlp, dep_matches, lang)
 #     transcript_json['summary'] = functions_matcher[lang]['summary'](
