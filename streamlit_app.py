@@ -9,7 +9,17 @@ import json
 from markdown import markdown
 import pdfkit
 import subprocess
-from Langdentifier.lang_identification import model, get_language, read_audio, SAMPLING_RATE 
+import torch
+import subprocess
+
+torch.set_num_threads(1)
+SAMPLING_RATE = 16000
+model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
+                              model='silero_lang_detector',
+                              force_reload=False,
+                              onnx=False)
+
+get_language, read_audio = utils
 
 
 CURRENT_DIR = os.path.dirname(__file__)
