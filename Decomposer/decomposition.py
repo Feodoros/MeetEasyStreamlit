@@ -41,7 +41,9 @@ def decompose(transcript_json, lang):
     if lang=='ru':
         summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
         tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
+        print('loaded tokenizer')
         summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
+        print('loaded model')
         transcript_json['chapters'] = get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, summary_model, tokenizer)
     transcript_json = get_assembly_summary(transcript_json, nlp, dep_matcher, lang)
 #         text, doc, nlp, dep_matches, lang)
