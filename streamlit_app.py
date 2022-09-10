@@ -9,7 +9,7 @@ import json
 from markdown import markdown
 import pdfkit
 import subprocess
-from Langdentifier.lang_identification import *
+from Langdentifier.lang_identification import model, get_language, read_audio 
 
 
 CURRENT_DIR = os.path.dirname(__file__)
@@ -68,6 +68,7 @@ def main():
                     wav = read_audio(shortened_path, sampling_rate=SAMPLING_RATE)
                 lang = get_language(wav, model)
                 os.remove(shortened_path)
+                del model
                 
                 st.info('Transcribing...')
                 if lang=='ru':
