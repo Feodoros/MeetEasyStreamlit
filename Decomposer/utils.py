@@ -173,7 +173,7 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
 #     st.info('loaded model')
 #     return (tokenizer, summary_model)
 
-@st.cache
+# @st.cache
 def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang):
     
     summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
