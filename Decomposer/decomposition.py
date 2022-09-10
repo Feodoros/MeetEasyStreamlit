@@ -1,3 +1,4 @@
+import streamlit as st
 from Decomposer.utils import *
 from Decomposer.matcher import *
 from transformers import MBartTokenizer, MBartForConditionalGeneration
@@ -5,6 +6,15 @@ import spacy
 from spacy.matcher import Matcher, DependencyMatcher
 from langdetect import detect
 import pyinflect
+
+@st.cache
+def load_model():
+    summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
+    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
+    print('loaded tokenizer')
+    summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
+    print('loaded model')
+    return (tokenizer, summary_model)
 
 
 functions_matcher = {'ru': {'topic': get_keywords,
@@ -39,11 +49,7 @@ def decompose(transcript_json, lang):
     transcript_json['topic'] = functions_matcher[lang]['topic'](text)
     transcript_json['task'] = functions_matcher[lang]['task'](transcript_json, doc, nlp, dep_matcher, dep_matches)
     if lang=='ru':
-        summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
-        tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
-        print('loaded tokenizer')
-        summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
-        print('loaded model')
+        tokenizer, summary_model = load_model()
         transcript_json['chapters'] = get_mbart_ru_summary(text, doc, nlp, dep_matches, lang, summary_model, tokenizer)
     transcript_json = get_assembly_summary(transcript_json, nlp, dep_matcher, lang)
 #         text, doc, nlp, dep_matches, lang)
