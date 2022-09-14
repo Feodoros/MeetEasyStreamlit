@@ -69,25 +69,28 @@ def main():
                 lang = get_language(wav, model)
                 os.remove(shortened_path)
                 
-                st.info('Transcribing...')
-                if lang=='ru':
-                    meeting_json = yandex_transcription.transcribe_meeting(file_path)
-                else:
+                
+                if lang!='ru':
+                    st.info('Transcribing...')
+#                     meeting_json = yandex_transcription.transcribe_meeting(file_path)
                     lang='en'
                     meeting_json = assembly_recognition.transcribe_meeting(
                     file_path)
-                os.remove(file_path)
+                    os.remove(file_path)
 
-                # Decompose meeting:
-                # Summary, Tasks, Reminders, plans, etc
-                st.info('Decomposing...')
-                meeting_json = decomposition.decompose(meeting_json, lang)
+                    # Decompose meeting:
+                    # Summary, Tasks, Reminders, plans, etc
+                    st.info('Decomposing...')
+                    meeting_json = decomposition.decompose(meeting_json, lang)
 
-                with open(os.path.join(DB, f'{file_name}.json'), 'w+', encoding='utf-8') as f:
-                    json.dump(meeting_json, f, ensure_ascii=False)
-            meeting_json['file_name'] = file_name
-            st.balloons()
-            st.session_state.meeting_json = meeting_json
+                    with open(os.path.join(DB, f'{file_name}.json'), 'w+', encoding='utf-8') as f:
+                        json.dump(meeting_json, f, ensure_ascii=False)
+                    meeting_json['file_name'] = file_name
+                    st.balloons()
+                    st.session_state.meeting_json = meeting_json
+                else:
+                    st.info('We do not have solution for the Russian language yet, but we are working on it, so please stay tuned!')
+                
 
     if (st.session_state.meeting_json):
         full_markdown = streamlit_followup_builder.build_followup(
