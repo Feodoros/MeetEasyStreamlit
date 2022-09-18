@@ -4,6 +4,7 @@ import os
 import time
 import random
 from datetime import timedelta
+import streamlit as st
 
 endpoint = "https://api.assemblyai.com/v2/transcript"
 
@@ -11,20 +12,20 @@ auth_tokens = ["98d634acce314757909483d17a791819", '82532fe8a1f643d6b35ae07fb86a
                '85948795b8174fea8b565f3934508d2f', '8309e4e43e8d47eb9b787545444dd360', '072eedb31d8146e49c21534a73ce8779',
                'b3ce06ef416c481f9651ab313c9d58ce', 'ce882c6a139b4419b1c799377428ec3a', '75be7ab4f09b4d01b2abd10d04f20b6e']
 
-headers = {
-    "authorization": random.choice(auth_tokens),
-    "content-type": "application/json",
-    "User-Agent": "Mozilla/5.0"
-}
-
 
 def post_audio(headers, recording_path):
 
     response = requests.post('https://api.assemblyai.com/v2/upload',
                              headers=headers,
                              data=read_file_by_chunk(recording_path))
+    response_json = {}
+    try:
+        response_json = response.json()
+    except:
+        st.write(response)
+        raise Exception(f"Bad response (via token {headers['authorization']}). Retry after 10 seconds.")        
 
-    json = {"audio_url": response.json()['upload_url'], "speaker_labels": True,
+    json = {"audio_url": response_json['upload_url'], "speaker_labels": True,
             'auto_chapters': True, "auto_highlights": True}
     response = requests.post(endpoint, json=json, headers=headers)
 
@@ -60,6 +61,11 @@ def post_audio(headers, recording_path):
 
 def transcribe_meeting(recording_path):
     print('Uploading file to cloud')
+    headers = {
+        "authorization": random.choice(auth_tokens),
+        "content-type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
     polling_response = post_audio(headers, recording_path)
 #     response = requests.post('https://api.assemblyai.com/v2/upload',
 #                              headers=headers,
