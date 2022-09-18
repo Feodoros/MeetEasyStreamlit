@@ -16,6 +16,15 @@ CURRENT_DIR = os.path.dirname(__file__)
 DB = os.path.join(CURRENT_DIR, 'DB')
 CACHE = os.path.join(CURRENT_DIR, '.cache')
 
+SUPPORTED_AUDIO_TYPES = ['.3ga', '.8svx', '.aac', '.ac3', '.aif', 'aiff', '.alac', '.amr', '.ape', '.au', '.dss',
+                         '.flac', '.flv', '.m4a', '.m4b', '.m4p', '.m4r', '.mp3', '.mpga', '.ogg', '.oga', '.mogg',
+                         '.opus', '.qcp', '.tta', '.voc', '.wav', '.wma', '.wv']
+
+SUPPORTED_VIDEO_TYPES = ['.webm', '.MTS', '.M2TS',
+                         '.TS', '.mov', '.mp2', '.mp4', '.m4p', '.m4v', '.mxf']
+
+SUPPORTED_LANGS = ['en', 'ru']
+
 if not os.path.exists(DB):
     os.mkdir(DB)
 if not os.path.exists(CACHE):
@@ -33,64 +42,76 @@ def main():
 
     with st.expander("How to use", True):
         st.write("1) Upload a recording of your meeting")
-        st.write("2) Get a short summary, task list, and full transcript of the meeting")
+        st.write(
+            "2) Get a short summary, task list, and full transcript of the meeting")
         st.write("3) Processing time: 30 sec - 15 minutes, depending on file size")
 
-    uploaded_file = st.file_uploader("Choose a file")
+    uploaded_file = st.file_uploader("Choose a recording")
     if uploaded_file is not None:
         bytes_data = uploaded_file.getvalue()
         file_name = uploaded_file.name
 
         if st.button('Process file'):
-            if bytes_data:
+            if not bytes_data:
+                pass
+
+            # Process file
+            with st.spinner('Wait for it...'):
                 file_path = os.path.join(CACHE, file_name)
                 with open(file_path, 'wb+') as f:
                     f.write(bytes_data)
 
-            with st.spinner('Wait for it...'):
-                audio = AudioSegment.from_file(file_path)
-                duration = audio.duration_seconds
+                _, file_extension = get_file_name_and_ext(file_path)
+
+                # Converting video or unsupported audio to .wav format
+                if file_extension not in SUPPORTED_AUDIO_TYPES:
+                    st.info("Extracting audio...")
+                    file_path = convert_file(file_path)
+
+                duration = get_audio_duration(file_path)
                 approximate_time = duration * 0.4
                 st.info(
                     f"Approximate processing time: {str(datetime.timedelta(seconds=round(approximate_time)))}")
-                
-                st.info('Identifying the language...')
-                dotsplit = file_path.split('.')
-                shortened_path = ".".join(dotsplit[:-1])+'_shortened.'+dotsplit[-1]
-                subprocess.call(['ffmpeg','-n', '-i', file_path,'-to','20','-c', 'copy', shortened_path])
-                if dotsplit[-1]!='wav':
-                    wav_path = ".".join(shortened_path.split('.')[:-1]+['wav'])
-                    subprocess.call(['ffmpeg','-n', '-i', shortened_path,'-acodec','pcm_u8','-ar', '16000', wav_path])
 
-                    wav = read_audio(wav_path, sampling_rate=SAMPLING_RATE)
-                    os.remove(wav_path)
-                else:
-                    wav = read_audio(shortened_path, sampling_rate=SAMPLING_RATE)
-                lang = get_language(wav, model)
-                os.remove(shortened_path)
-                
-                
-                if lang!='ru':
+                st.info('Identifying the language...')
+                lang = detect_lang(file_path)
+                if lang not in SUPPORTED_LANGS:
+                    st.error(f"Unsupported language detected: {lang}")
+                    pass
+                st.info(f'Detected language: {lang}')
+
+                if lang != 'ru':
+                    # Transcribe meeting
                     st.info('Transcribing...')
 #                     meeting_json = yandex_transcription.transcribe_meeting(file_path)
-                    lang='en'
-                    meeting_json = assembly_recognition.transcribe_meeting(
-                    file_path)
-                    os.remove(file_path)
+                    lang = 'en'
+
+                    try:
+                        meeting_json = assembly_recognition.transcribe_meeting(
+                            file_path)
+                    except Exception as e:
+                        message = e
+                        if hasattr(e, 'message'):
+                            message = e.message
+                        st.error(
+                            f"Error occurred while transcribing meeting: {message}")
+                        pass
+                    finally:
+                        os.remove(file_path)
 
                     # Decompose meeting:
                     # Summary, Tasks, Reminders, plans, etc
                     st.info('Decomposing...')
                     meeting_json = decomposition.decompose(meeting_json, lang)
 
-                    with open(os.path.join(DB, f'{file_name}.json'), 'w+', encoding='utf-8') as f:
+                    with open(os.path.join(DB, f"{file_name.split(chr(92))[-1]}.json"), 'w+', encoding='utf-8') as f:
                         json.dump(meeting_json, f, ensure_ascii=False)
                     meeting_json['file_name'] = file_name
                     st.balloons()
                     st.session_state.meeting_json = meeting_json
                 else:
-                    st.info('We do not have solution for the Russian language yet, but we are working on it, so please stay tuned!')
-                
+                    st.info(
+                        'We do not have solution for the Russian language yet, but we are working on it, so please stay tuned!')
 
     if (st.session_state.meeting_json):
         full_markdown = streamlit_followup_builder.build_followup(
@@ -133,6 +154,44 @@ def download_followup(full_markdown, meeting_json):
 
     st.markdown("**MeetEasy** - Perfect AI assistant for your meeting.")
     st.markdown("Make your meetings **more productive.**")
+
+
+def get_audio_duration(file_path):
+    result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                             "format=duration", "-of",
+                             "default=noprint_wrappers=1:nokey=1", file_path],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+    return float(result.stdout)
+
+
+def convert_file(file_path):
+    file_name, _ = get_file_name_and_ext(file_path)
+    converted_file_path = f"{file_name}.wav"
+    subprocess.call(['ffmpeg', '-i', file_path,
+                    '-vcodec', 'copy', converted_file_path])
+    os.remove(file_path)
+    return converted_file_path
+
+
+def detect_lang(file_path):
+    file_name, _ = get_file_name_and_ext(file_path)
+    shortened_file_path = f"{file_name}_shortened.wav"
+    try:
+        subprocess.call(['ffmpeg', '-n', '-i', file_path,
+                        '-to', '20', '-vcodec', 'copy', shortened_file_path])
+        shortened_read_audio = read_audio(
+            shortened_file_path, sampling_rate=SAMPLING_RATE)
+        lang = get_language(shortened_read_audio, model)
+        return lang
+    except:
+        return ''
+    finally:
+        os.remove(shortened_file_path)
+
+
+def get_file_name_and_ext(file_path):
+    return os.path.splitext(file_path)
 
 
 if __name__ == "__main__":

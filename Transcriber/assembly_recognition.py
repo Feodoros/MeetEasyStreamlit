@@ -4,13 +4,6 @@ import os
 import time
 import random
 from datetime import timedelta
-from pydub import AudioSegment
-import streamlit as st
-
-suported_file_types = ['.3ga', '.8svx', '.aac', '.ac3', '.aif', 'aiff', '.alac', '.amr', '.ape', '.au', '.dss',
-                       '.flac', '.flv', '.m4a', '.m4b', '.m4p', '.m4r', '.mp3', '.mpga', '.ogg', '.oga', '.mogg',
-                       '.opus', '.qcp', '.tta', '.voc', '.wav', '.wma', '.wv', '.webm', '.MTS', '.M2TS', '.TS', '.mov',
-                       '.mp2', '.mp4', '.m4p', '.m4v', '.mxf']
 
 endpoint = "https://api.assemblyai.com/v2/transcript"
 
@@ -30,7 +23,7 @@ def post_audio(headers, recording_path):
     response = requests.post('https://api.assemblyai.com/v2/upload',
                              headers=headers,
                              data=read_file_by_chunk(recording_path))
-    st.write(response)
+
     json = {"audio_url": response.json()['upload_url'], "speaker_labels": True,
             'auto_chapters': True, "auto_highlights": True}
     response = requests.post(endpoint, json=json, headers=headers)
@@ -66,15 +59,6 @@ def post_audio(headers, recording_path):
 
 
 def transcribe_meeting(recording_path):
-    new_name = ''
-    filename, file_extension = os.path.splitext(recording_path)
-    if (file_extension not in suported_file_types):
-        print('Convert file to ogg format')
-        new_name = secrets.token_hex(16) + '.ogg'
-        audio_in = AudioSegment.from_file(recording_path)
-        audio_in.export(new_name, format='ogg', codec='libopus')
-        recording_path = new_name
-
     print('Uploading file to cloud')
     polling_response = post_audio(headers, recording_path)
 #     response = requests.post('https://api.assemblyai.com/v2/upload',
@@ -107,9 +91,6 @@ def transcribe_meeting(recording_path):
 #                 pass
 
 #         time.sleep(3)
-
-    if (new_name):
-        os.remove(new_name)
 
     return process_transcript_json(polling_response.json())
 # def transcribe_meeting(recording_path):
