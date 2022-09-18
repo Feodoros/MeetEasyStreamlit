@@ -15,16 +15,18 @@ suported_file_types = ['.3ga', '.8svx', '.aac', '.ac3', '.aif', 'aiff', '.alac',
 endpoint = "https://api.assemblyai.com/v2/transcript"
 
 auth_tokens = ["98d634acce314757909483d17a791819", '82532fe8a1f643d6b35ae07fb86aadee', '423b657d17554cf4ad218e4f127e2aae',
-               '85948795b8174fea8b565f3934508d2f', '8309e4e43e8d47eb9b787545444dd360', '072eedb31d8146e49c21534a73ce8779', 'b3ce06ef416c481f9651ab313c9d58ce', 'ce882c6a139b4419b1c799377428ec3a', '75be7ab4f09b4d01b2abd10d04f20b6e']
+               '85948795b8174fea8b565f3934508d2f', '8309e4e43e8d47eb9b787545444dd360', '072eedb31d8146e49c21534a73ce8779',
+               'b3ce06ef416c481f9651ab313c9d58ce', 'ce882c6a139b4419b1c799377428ec3a', '75be7ab4f09b4d01b2abd10d04f20b6e']
 
 headers = {
     "authorization": random.choice(auth_tokens),
-    "content-type": "application/json"
+    "content-type": "application/json",
+    "User-Agent": "Mozilla/5.0"
 }
 
 
 def post_audio(headers, recording_path):
-    
+
     response = requests.post('https://api.assemblyai.com/v2/upload',
                              headers=headers,
                              data=read_file_by_chunk(recording_path))
@@ -43,22 +45,23 @@ def post_audio(headers, recording_path):
 
         if status == 'completed':
             print('Transcribing done.')
-            
+
         elif status == 'error':
-            
-            if polling_response.json()['error']=="Insufficient Funds":
-                
+
+            if polling_response.json()['error'] == "Insufficient Funds":
+
                 auth_tokens.remove(headers['authorization'])
-                
-                headers = {"authorization": random.choice(auth_tokens), "content-type": "application/json"}
-                
+
+                headers = {"authorization": random.choice(
+                    auth_tokens), "content-type": "application/json"}
+
                 polling_response = post_audio(headers, recording_path)
             else:
-                print('Transcribing failed with the {} error.'.format(polling_response.json()['error']))
-                
+                print('Transcribing failed with the {} error.'.format(
+                    polling_response.json()['error']))
 
         time.sleep(3)
-        
+
     return polling_response
 
 
@@ -92,15 +95,15 @@ def transcribe_meeting(recording_path):
 
 #         if status == 'completed':
 #             print('Transcribing done.')
-            
+
 #         elif status == 'error':
-            
+
 #             if polling_response.json()['status']=="Insufficient Funds":
-                
+
 #                 auth_tokens.remove(headers['authorization'])
-                
+
 #                 headers = {"authorization": random.choice(auth_tokens), "content-type": "application/json"}
-            
+
 #                 pass
 
 #         time.sleep(3)
@@ -138,15 +141,15 @@ def transcribe_meeting(recording_path):
 
 #         if status == 'completed':
 #             print('Transcribing done.')
-            
+
 #         elif status == 'error':
-            
+
 #             if polling_response.json()['status']=="Insufficient Funds":
-                
+
 #                 auth_tokens.remove(headers['authorization'])
-                
+
 #                 headers = {"authorization": random.choice(auth_tokens), "content-type": "application/json"}
-            
+
 #                 pass
 
 #         time.sleep(3)
