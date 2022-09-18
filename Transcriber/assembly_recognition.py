@@ -5,6 +5,7 @@ import time
 import random
 from datetime import timedelta
 from pydub import AudioSegment
+import streamlit as st
 
 suported_file_types = ['.3ga', '.8svx', '.aac', '.ac3', '.aif', 'aiff', '.alac', '.amr', '.ape', '.au', '.dss',
                        '.flac', '.flv', '.m4a', '.m4b', '.m4p', '.m4r', '.mp3', '.mpga', '.ogg', '.oga', '.mogg',
@@ -27,7 +28,7 @@ def post_audio(headers, recording_path):
     response = requests.post('https://api.assemblyai.com/v2/upload',
                              headers=headers,
                              data=read_file_by_chunk(recording_path))
-
+    st.write(response)
     json = {"audio_url": response.json()['upload_url'], "speaker_labels": True,
             'auto_chapters': True, "auto_highlights": True}
     response = requests.post(endpoint, json=json, headers=headers)
