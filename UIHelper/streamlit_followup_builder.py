@@ -1,10 +1,6 @@
 import streamlit as st
-import os
-
 
 overall_markdown_str = ''
-
-CURRENT_DIR = os.path.dirname(__file__)
 
 
 def build_followup(meeting_json):
@@ -20,7 +16,7 @@ def build_followup(meeting_json):
 
     overall_summary = ''
     for chapter in chapters:
-        overall_summary += chapter['summary'] + ' '
+        overall_summary += chapter['summary'] + '\n\n'
 
     if meeting_json['topic']:
         st.markdown('## Key words:')
@@ -43,28 +39,30 @@ def build_followup(meeting_json):
 
     overall_markdown_str += "## Tasks:" + '\n'
     tasks = meeting_json['task']
-    
+
     try:
-        if len(tasks.keys())>1:
-            if len([task for speaker in tasks.keys() for task in tasks[speaker]]) >6:
+        if len(tasks.keys()) > 1:
+            if len([task for speaker in tasks.keys() for task in tasks[speaker]]) > 6:
                 with st.expander("Tasks"):
                     for speaker in tasks.keys():
                         for task in tasks[speaker]:
                             task = task.capitalize()
                             overall_markdown_str += f"- {task} (assigned by speaker {speaker})" + '\n'
-                            st.markdown(f"- {task} (assigned by speaker {speaker})")
+                            st.markdown(
+                                f"- {task} (assigned by speaker {speaker})")
             else:
                 st.markdown("## Tasks:")
                 for speaker in tasks.keys():
                     for task in tasks[speaker]:
                         task = task.capitalize()
                         overall_markdown_str += f"- {task} (assigned by speaker {speaker})" + '\n'
-                        st.markdown(f"- {task} (assigned by speaker {speaker})")
+                        st.markdown(
+                            f"- {task} (assigned by speaker {speaker})")
         else:
             tasks = meeting_json['task']['A']
             raise ValueError('Only one speaker.')
     except:
-    
+
         if len(tasks) >= 6:
             with st.expander("Tasks"):
                 for task in tasks:
@@ -129,3 +127,4 @@ def message_list_2_markdown(message_list):
         st.markdown(
             f"{message['start_time']} **{message['speaker']}**: {res_text}", unsafe_allow_html=True)
         overall_markdown_str += f"{message['start_time']} **{message['speaker']}**: {res_text}<br/>"
+    overall_markdown_str += '\n'
