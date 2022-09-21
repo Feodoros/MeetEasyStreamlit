@@ -157,7 +157,7 @@ def download_followup(full_markdown, meeting_json):
             mime='application/octet-stream')
         os.remove(filename + '.pdf')
 
-    st.markdown("**MeetEasy** - Perfect AI assistant for your meeting.")
+    st.markdown("**MyMeet.ai** - Perfect AI assistant for your meeting.")
     st.markdown("Make your meetings **more productive.**")
 
 
