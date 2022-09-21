@@ -109,7 +109,7 @@ def main():
                     meeting_json['title'] = title
                     with open(os.path.join(DB, f"{file_name.split(chr(92))[-1]}.json"), 'w+', encoding='utf-8') as f:
                         json.dump(meeting_json, f, ensure_ascii=False)
-                    
+
                     st.balloons()
                     st.session_state.meeting_json = meeting_json
                 else:
@@ -129,7 +129,9 @@ def download_followup(full_markdown, meeting_json):
     option = st.selectbox(
         "How would you like to download followup?", ("Markdown", "JSON", "PDF"))
 
-    filename = meeting_json['file_name']
+    title = meeting_json.get('title')
+    filename = title if title else meeting_json['file_name']
+
     if option == "Markdown":
         st.download_button(
             label="Download md",
