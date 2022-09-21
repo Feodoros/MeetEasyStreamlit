@@ -11,7 +11,8 @@ endpoint = "https://api.assemblyai.com/v2/transcript"
 auth_tokens = ["98d634acce314757909483d17a791819", '82532fe8a1f643d6b35ae07fb86aadee', '423b657d17554cf4ad218e4f127e2aae',
                '85948795b8174fea8b565f3934508d2f', '8309e4e43e8d47eb9b787545444dd360', '072eedb31d8146e49c21534a73ce8779',
                'b3ce06ef416c481f9651ab313c9d58ce', 'ce882c6a139b4419b1c799377428ec3a', '75be7ab4f09b4d01b2abd10d04f20b6e',
-               'da03de683f59456ba7fe4045231a0d5f', 'd6c350ea98aa4f0b842921bb94ddcda0', '16915072ecb24b9c8b192070cdb8d37b']
+               'da03de683f59456ba7fe4045231a0d5f', 'd6c350ea98aa4f0b842921bb94ddcda0', '16915072ecb24b9c8b192070cdb8d37b',
+               'cca3d5a8062b4164a1d4d6c67b65ee10', '6db1619538f64cfa81f661b702660141', 'fa6576b341724766b3e48c02730d6160']
 
 
 def post_audio(recording_path):
