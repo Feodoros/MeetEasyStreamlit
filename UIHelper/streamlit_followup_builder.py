@@ -1,3 +1,4 @@
+from datetime import datetime
 import streamlit as st
 
 overall_markdown_str = ''
@@ -8,6 +9,18 @@ def build_followup(meeting_json):
     overall_markdown_str = ''
 
     st.success("Here's your followup!")
+
+    title = meeting_json.get('title')
+    if title:
+        title = f"# {title}"
+        st.markdown(title)
+        overall_markdown_str += title + '\n'
+
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    date = f"## Date: {dt_string}"
+    st.markdown(date)
+    overall_markdown_str += date + '\n'
 
     chapters = meeting_json.get('chapters')
     if not chapters:

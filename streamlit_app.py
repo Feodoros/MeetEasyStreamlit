@@ -46,6 +46,7 @@ def main():
             "2) Get a short summary, task list, and full transcript of the meeting")
         st.write("3) Processing time: 30 sec - 15 minutes, depending on file size")
 
+    title = st.text_input('Meeting name', '')
     uploaded_file = st.file_uploader("Choose a recording")
     if uploaded_file is not None:
         bytes_data = uploaded_file.getvalue()
@@ -104,9 +105,11 @@ def main():
                     st.info('Decomposing...')
                     meeting_json = decomposition.decompose(meeting_json, lang)
 
+                    meeting_json['file_name'] = file_name
+                    meeting_json['title'] = title
                     with open(os.path.join(DB, f"{file_name.split(chr(92))[-1]}.json"), 'w+', encoding='utf-8') as f:
                         json.dump(meeting_json, f, ensure_ascii=False)
-                    meeting_json['file_name'] = file_name
+                    
                     st.balloons()
                     st.session_state.meeting_json = meeting_json
                 else:
