@@ -12,13 +12,13 @@ def build_followup(meeting_json):
 
     title = meeting_json.get('title')
     if title:
-        title = f"# {title}"
+        title = f"## {title}"
         st.markdown(title)
         overall_markdown_str += title + '\n'
 
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    date = f"## Date: {dt_string}"
+    date = f"### Date: {dt_string}"
     st.markdown(date)
     overall_markdown_str += date + '\n'
 
@@ -32,25 +32,25 @@ def build_followup(meeting_json):
         overall_summary += chapter['summary'] + '\n\n'
 
     if meeting_json['topic']:
-        st.markdown('## Key words:')
-        overall_markdown_str += '## Key words:' + '\n'
+        st.markdown('### Key words:')
+        overall_markdown_str += '### Key words:' + '\n'
         key_words = meeting_json['topic']
         for kw in key_words:
             kw = kw.capitalize()
             overall_markdown_str += f"- {kw}" + '\n'
             st.markdown(f"- {kw}")
 
-    overall_markdown_str += "## Summary:" + '\n'
+    overall_markdown_str += "### Summary:" + '\n'
     overall_markdown_str += overall_summary + '\n'
 
     if(len(overall_summary) >= 400):
         with st.expander("Summary"):
             st.write(overall_summary)
     else:
-        st.markdown("## Summary:")
+        st.markdown("### Summary:")
         st.write(overall_summary)
 
-    overall_markdown_str += "## Tasks:" + '\n'
+    overall_markdown_str += "### Tasks:" + '\n'
     tasks = meeting_json['task']
 
     try:
@@ -83,19 +83,19 @@ def build_followup(meeting_json):
                     overall_markdown_str += f"- {task}" + '\n'
                     st.markdown(f"- {task}")
         else:
-            st.markdown("## Tasks:")
+            st.markdown("### Tasks:")
             for task in tasks:
                 task = task.capitalize()
                 overall_markdown_str += f"- {task}" + '\n'
                 st.markdown(f"- {task}")
 
-    st.markdown("## Chapters:")
+    st.markdown("### Chapters:")
     overall_markdown_str += "## Chapters:" + '\n'
     st.markdown(
         """
         <style>
         .streamlit-expanderHeader {
-            font-size: 140%;
+            font-size: 120%;
         }
         </style>
         """,
@@ -104,14 +104,14 @@ def build_followup(meeting_json):
 
     for idx, chapter in enumerate(chapters):
         with st.expander(chapter['headline']):
-            overall_markdown_str += f"### Chapter {idx + 1}. {chapter['headline']}" + '\n'
-            overall_markdown_str += "#### Chapter summary:" + '\n'
+            overall_markdown_str += f"#### Chapter {idx + 1}. {chapter['headline']}" + '\n'
+            overall_markdown_str += "##### Chapter summary:" + '\n'
             overall_markdown_str += f"{chapter['summary']}" + '\n'
-            overall_markdown_str += f"#### Chapter transcript:" + '\n'
+            overall_markdown_str += f"##### Chapter transcript:" + '\n'
 
-            st.markdown("#### Chapter summary:")
+            st.markdown("##### Chapter summary:")
             st.markdown(chapter['summary'])
-            st.markdown("#### Chapter transcript:")
+            st.markdown("##### Chapter transcript:")
             message_list_2_markdown(chapter['message_list'])
 
     st.sidebar.title("Table of contents")
