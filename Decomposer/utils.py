@@ -151,7 +151,7 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
             coloured_list = []
             output = []
             for match in dep_matches:
-                if nlp.vocab[match[0]].text!='strong_been_done':
+                if nlp.vocab[match[0]].text in ['task','need','want',"could_you", 'imperative', 'weekday', 'time', 'remind', 'strong_do']:
                     matches = match[1]
                     output+=sorted(matches)
 
@@ -165,15 +165,6 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
     return transcript_json
 
 
-# def load_model(suppress_st_warning=True):
-#     summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
-#     tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
-#     st.info('loaded tokenizer')
-#     summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
-#     st.info('loaded model')
-#     return (tokenizer, summary_model)
-
-# @st.cache
 def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang):
     
     summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
