@@ -31,7 +31,7 @@ def post_audio(recording_path):
 
     response_json = response.json()
     json = {"audio_url": response_json['upload_url'], "speaker_labels": True,
-            'auto_chapters': True, "auto_highlights": True}
+            'auto_chapters': True, "auto_highlights": True, "language_detection": True}
     response = requests.post(endpoint, json=json, headers=headers)
 
     print('Transcribing...')

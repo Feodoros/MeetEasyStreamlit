@@ -12,7 +12,16 @@ functions_matcher = {'ru': {'topic': get_keywords,
                      'en': {'topic': get_en_keywords,
                             'summary': get_en_summary,
                             'task': get_personal_tasks,
-                            }}
+                            },
+                     'de': {'topic': get_en_keywords,
+                            'summary': get_en_summary,
+                            'task': lambda *args: None,
+                           },
+                     'es': {'topic': get_en_keywords,
+                            'summary': get_en_summary,
+                            'task': lambda *args: None,
+                           }
+                    }
 
 
 def decompose(transcript_json, lang):

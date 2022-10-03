@@ -49,14 +49,24 @@ def build_followup(meeting_json):
     else:
         st.markdown("### Summary:")
         st.write(overall_summary)
+        
+    
+    if meeting_json['task']:
+        overall_markdown_str += "### Tasks:" + '\n'
+        tasks = meeting_json['task']
 
-    overall_markdown_str += "### Tasks:" + '\n'
-    tasks = meeting_json['task']
-
-    try:
-        if len(tasks.keys()) > 1:
-            if len([task for speaker in tasks.keys() for task in tasks[speaker]]) > 6:
-                with st.expander("Tasks"):
+        try:
+            if len(tasks.keys()) > 1:
+                if len([task for speaker in tasks.keys() for task in tasks[speaker]]) > 6:
+                    with st.expander("Tasks"):
+                        for speaker in tasks.keys():
+                            for task in tasks[speaker]:
+                                task = task.capitalize()
+                                overall_markdown_str += f"- {task} (assigned by speaker {speaker})" + '\n'
+                                st.markdown(
+                                    f"- {task} (assigned by speaker {speaker})")
+                else:
+                    st.markdown("## Tasks:")
                     for speaker in tasks.keys():
                         for task in tasks[speaker]:
                             task = task.capitalize()
@@ -64,30 +74,22 @@ def build_followup(meeting_json):
                             st.markdown(
                                 f"- {task} (assigned by speaker {speaker})")
             else:
-                st.markdown("## Tasks:")
-                for speaker in tasks.keys():
-                    for task in tasks[speaker]:
-                        task = task.capitalize()
-                        overall_markdown_str += f"- {task} (assigned by speaker {speaker})" + '\n'
-                        st.markdown(
-                            f"- {task} (assigned by speaker {speaker})")
-        else:
-            tasks = meeting_json['task']['A']
-            raise ValueError('Only one speaker.')
-    except:
+                tasks = meeting_json['task']['A']
+                raise ValueError('Only one speaker.')
+        except:
 
-        if len(tasks) >= 6:
-            with st.expander("Tasks"):
+            if len(tasks) >= 6:
+                with st.expander("Tasks"):
+                    for task in tasks:
+                        task = task.capitalize()
+                        overall_markdown_str += f"- {task}" + '\n'
+                        st.markdown(f"- {task}")
+            else:
+                st.markdown("### Tasks:")
                 for task in tasks:
                     task = task.capitalize()
                     overall_markdown_str += f"- {task}" + '\n'
                     st.markdown(f"- {task}")
-        else:
-            st.markdown("### Tasks:")
-            for task in tasks:
-                task = task.capitalize()
-                overall_markdown_str += f"- {task}" + '\n'
-                st.markdown(f"- {task}")
 
     st.markdown("### Chapters:")
     overall_markdown_str += "## Chapters:" + '\n'

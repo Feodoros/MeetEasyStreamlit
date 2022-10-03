@@ -23,7 +23,7 @@ SUPPORTED_AUDIO_TYPES = ['.3ga', '.8svx', '.aac', '.ac3', '.aif', 'aiff', '.alac
 SUPPORTED_VIDEO_TYPES = ['.webm', '.MTS', '.M2TS',
                          '.TS', '.mov', '.mp2', '.mp4', '.m4p', '.m4v', '.mxf']
 
-SUPPORTED_LANGS = ['en', 'ru']
+SUPPORTED_LANGS = ['en', 'ru', 'de', 'es']
 
 if not os.path.exists(DB):
     os.mkdir(DB)
@@ -76,16 +76,12 @@ def main():
 
                 st.info('Identifying the language...')
                 lang = detect_lang(file_path)
-                if lang not in SUPPORTED_LANGS:
-                    st.error(f"Unsupported language detected: {lang}")
-                    pass
-                st.info(f'Detected language: {lang}')
 
                 if lang != 'ru':
                     # Transcribe meeting
                     st.info('Transcribing...')
 #                     meeting_json = yandex_transcription.transcribe_meeting(file_path)
-                    lang = 'en'
+#                     lang = 'en'
 
                     try:
                         meeting_json = assembly_recognition.transcribe_meeting(
