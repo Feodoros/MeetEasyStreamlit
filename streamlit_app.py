@@ -23,7 +23,7 @@ SUPPORTED_AUDIO_TYPES = ['.3ga', '.8svx', '.aac', '.ac3', '.aif', 'aiff', '.alac
 SUPPORTED_VIDEO_TYPES = ['.webm', '.MTS', '.M2TS',
                          '.TS', '.mov', '.mp2', '.mp4', '.m4p', '.m4v', '.mxf']
 
-SUPPORTED_LANGS = ['en', 'ru', 'de', 'es']
+SUPPORTED_LANGS = ['en', 'ru', 'de', 'es', 'fr', 'it', 'pt', 'nl']
 
 if not os.path.exists(DB):
     os.mkdir(DB)
