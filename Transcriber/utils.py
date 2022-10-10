@@ -24,7 +24,7 @@ def get_audio_recognition(name, api_key, post, bucket_name):
     body = {
         "config": {
             "specification": {
-                "languageCode": "auto",
+                "languageCode": "ru-RUS",
             }
         },
         "audio": {
