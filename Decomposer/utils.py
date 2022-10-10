@@ -5,8 +5,11 @@ import random
 from keybert import KeyBERT
 from collections import defaultdict
 from Decomposer.matcher import *
-import streamlit as st
-from transformers import MBartTokenizer, MBartForConditionalGeneration
+from googletrans import Translator
+import json
+import openai
+translator = Translator()
+openai.api_key = "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"
 
 kw_model = KeyBERT()
 morph = pymorphy2.MorphAnalyzer()
@@ -20,21 +23,16 @@ def process_json(transcript_json):
     else:
         text = ''
         for message in transcript_json['message_list']:
-            text += message['text'].lower() + ' '
+            text += message['text'] + '. '
         return text
 
 
 def split_text_by_speaker(transcript_json):
     
     texts_by_speaker = defaultdict(str)
-#     if "speaker" in transcript_json['message_list'][0].keys():
 
     for message in transcript_json['message_list']:
-        texts_by_speaker[message['speaker']]+=message['text']
-
-#     else:
-#         #texts_by_speaker[speaker] = process_json(transcript_json)
-#         pass
+        texts_by_speaker[message['speaker']]+=" "+message['text'].lower()
                 
     return texts_by_speaker
 
@@ -121,16 +119,27 @@ def get_en_tasks(transcript_json, nlp, dep_matcher):
                 output = sorted([matches[0], matches[1]])
                 tasks.append(["..." + doc[output[0] - 6: output[0]].text, doc[output[0]].text,
                                  doc[output[0]+1:output[1]].text, doc[output[1]].text, doc[output[1]+1: output[1] + 15].text+"..."])
-                
-#                 tasks.append(join_dependant_tokens(1, doc, matches))
-    
-#             elif nlp.vocab[pattern_name].text == 'strong_do':
-
-#                 tasks.append(doc[matches[0]].text+' ' +
-#                          join_dependant_tokens(3, doc, matches))
         tasks_by_speaker[key] = tasks
         
     return tasks_by_speaker
+
+
+def colour(message, nlp, dep_matcher):
+    doc = nlp(message['text'])
+    dep_matches = dep_matcher(doc)
+    coloured_list = []
+    output = []
+    for match in dep_matches:
+        if nlp.vocab[match[0]].text in ['task','need','want',"could_you", 'imperative', 'weekday', 'time', 'remind', 'strong_do']:
+            matches = match[1]
+            output+=sorted(matches)
+
+    point = 0
+
+    for match_i in output:
+        coloured_list+=[doc[point: match_i].text, doc[match_i].text]
+        point = match_i+1
+    return coloured_list+[doc[point:].text]
 
 
 def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
@@ -146,76 +155,64 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
         else:
             chapter['message_list'] = transcript_json['message_list']
         for message in chapter['message_list']:
-            doc = nlp(message['text'])
-            dep_matches = dep_matcher(doc)
-            coloured_list = []
-            output = []
-            for match in dep_matches:
-                if nlp.vocab[match[0]].text in ['task','need','want',"could_you", 'imperative', 'weekday', 'time', 'remind', 'strong_do']:
-                    matches = match[1]
-                    output+=sorted(matches)
-
-            point = 0
-
-            for match_i in output:
-                coloured_list+=[doc[point: match_i].text, doc[match_i].text]
-                point = match_i+1
-            message['coloured'] = coloured_list+[doc[point:].text] 
+            message['coloured'] = colour(message, nlp, dep_matcher)
 
     return transcript_json
 
 
-def get_mbart_ru_summary(text, doc, nlp, dep_matches, lang):
-    
-    summary_model_name = "IlyaGusev/mbart_ru_sum_gazeta"
-    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
-    st.info('loaded tokenizer')
-    
-    input_ids = tokenizer(
-    [text],
-    max_length=600,
-    truncation=True,
-    return_tensors="pt",
-)["input_ids"]
-    
-    st.info('tokenized input')
-    del tokenizer
-    
-    summary_model = MBartForConditionalGeneration.from_pretrained(summary_model_name)
-    st.info('loaded model')
-    
-    output_ids = model.generate(
-    input_ids=input_ids,
-    no_repeat_ngram_size=4
-)[0]
-    
-    st.info('predicted summary')
-    
-    del input_ids
-    del model
-    
-    tokenizer = MBartTokenizer.from_pretrained(summary_model_name)
-    st.info('loaded tokenizer')
-    summary = tokenizer.decode(output_ids, skip_special_tokens=True)
-    del tokenizer
-    
-    discussed = []
-    
-    for i, match in enumerate(dep_matches):
-        pattern_name = match[0]
-        matches = match[1]
-        if nlp.vocab[pattern_name].text in ['discuss']:
-            
-            discussed.append(join_dependant_tokens(1, doc, matches))
+def request_gpt3_summary(text, prompt):
+    try:
+        response = openai.Completion.create(
+          engine="davinci-instruct-beta",
+          prompt=text+prompt,
+          temperature=0,
+          max_tokens=100,
+          top_p=1,
+          frequency_penalty=1
+        )
 
-    st.info('got topic')
-    big_regex = re.compile('|'.join(map(re.escape, summary_junk)))
-    topic = join_phrases(list(set(discussed)), lang, upper=False)
-    
-    if discussed:
-        return [{"summary" : big_regex.sub(random.choice(discussed_phrases[lang]), random.choice(discussed_phrases[lang])+' '+topic+ ' '+summary), "headline":'headline', "gist":topic.capitalize(),"start":0,"end":0}]
-    
-    return [{"summary" : big_regex.sub(random.choice(discussed_phrases[lang]), summary), "headline":'headline', "gist":"1","start":0,"end":0}]
+        print(response['choices'][0]['text'], translator.translate(response['choices'][0]['text'],src='en', dest='ru').text if translator.detect(response['choices'][0]['text']).lang=='en' else "")
+
+        summary = translator.translate(response['choices'][0]['text'],src='en', dest='ru').text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+
+    except:
+        response = openai.Completion.create(
+          engine="davinci-instruct-beta",
+          prompt=text[:int(len(text)/2)]+prompt,
+          temperature=0,
+          max_tokens=100,
+          top_p=1,
+          frequency_penalty=1
+        )
+        summary = translator.translate(response['choices'][0]['text'],src='en', dest='ru').text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+
+    return summary
+
+def request_summary(transcript_json, nlp, dep_matcher, lang):
+    n=20
+    chunks = [("\n".join([jsn['start_time']+" "+jsn['text'] for jsn in transcript_json['message_list'][i:i+n]]), transcript_json['message_list'][i:i+n]) for i in range(0, len(transcript_json['message_list']), n)]
+    chapters = [{'summary': '', 'headline': '','gist': '<gist>', 'text':'','message_list': []} for e in range(len(chunks))]
+    i=0
+    for text, message_list in chunks:
+            summary = request_gpt3_summary(text, prompt='\n\nSummarise in 5 lines or less')
+            headline = request_gpt3_summary(text, prompt='\n\nSummarise in 1 line')
+            if summary:
+                chapters[i]['summary']+=summary
+                chapters[i]['text']+=text
+                chapters[i]['message_list']+=message_list
+                chapters[i]['headline']=headline
+                i+=1
+
+            else:
+                chapters[i]['text']+=text
+                chapters[i]['message_list']+=message_list
+
+    transcript_json['chapters'] = chapters[:i] 
+    for chapter in transcript_json['chapters']:
+        for message in chapter['message_list']:
+            message['coloured'] = colour(message, nlp, dep_matcher)
+
+    return transcript_json
 
 
 def get_en_summary(text, doc, nlp, dep_matches, lang):

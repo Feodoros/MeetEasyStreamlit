@@ -77,11 +77,11 @@ def main():
                 st.info('Identifying the language...')
                 lang = detect_lang(file_path)
 
-                if lang != 'ru':
+                if lang == 'ru':
                     # Transcribe meeting
                     st.info('Transcribing...')
-#                     meeting_json = yandex_transcription.transcribe_meeting(file_path)
-#                     lang = 'en'
+                    meeting_json = yandex_transcription.transcribe_meeting(file_path)
+                else:
 
                     try:
                         meeting_json = assembly_recognition.transcribe_meeting(
@@ -96,21 +96,21 @@ def main():
                     finally:
                         os.remove(file_path)
 
-                    # Decompose meeting:
-                    # Summary, Tasks, Reminders, plans, etc
-                    st.info('Decomposing...')
-                    meeting_json = decomposition.decompose(meeting_json, lang)
+                # Decompose meeting:
+                # Summary, Tasks, Reminders, plans, etc
+                st.info('Decomposing...')
+                meeting_json = decomposition.decompose(meeting_json, lang)
 
-                    meeting_json['file_name'] = file_name
-                    meeting_json['title'] = title
-                    with open(os.path.join(DB, f"{file_name.split(chr(92))[-1]}.json"), 'w+', encoding='utf-8') as f:
-                        json.dump(meeting_json, f, ensure_ascii=False)
+                meeting_json['file_name'] = file_name
+                meeting_json['title'] = title
+                with open(os.path.join(DB, f"{file_name.split(chr(92))[-1]}.json"), 'w+', encoding='utf-8') as f:
+                    json.dump(meeting_json, f, ensure_ascii=False)
 
-                    st.balloons()
-                    st.session_state.meeting_json = meeting_json
-                else:
-                    st.info(
-                        'We do not have solution for the Russian language yet, but we are working on it, so please stay tuned!')
+                st.balloons()
+                st.session_state.meeting_json = meeting_json
+                    
+#                     st.info(
+#                         'We do not have solution for the Russian language yet, but we are working on it, so please stay tuned!')
 
     if (st.session_state.meeting_json):
         full_markdown = streamlit_followup_builder.build_followup(

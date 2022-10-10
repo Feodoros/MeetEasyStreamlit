@@ -2,6 +2,9 @@ tqdm==4.38.0
 spacy==3.3.0
 pyinflect
 pymorphy2
+openai
+gpt3
+googletrans==4.0.0rc1
 keybert
 langdetect
 transformers==4.9.0

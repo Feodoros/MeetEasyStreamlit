@@ -6,7 +6,7 @@ from langdetect import detect
 import pyinflect
 
 functions_matcher = {'ru': {'topic': get_keywords,
-                            'summary': get_mbart_ru_summary,
+                            'summary': request_summary,
                             'task': get_personal_tasks,
                             },
                      'en': {'topic': get_en_keywords,
@@ -27,7 +27,6 @@ functions_matcher = {'ru': {'topic': get_keywords,
 def decompose(transcript_json, lang):
 
     text = process_json(transcript_json)
-#     lang = detect(text)
 
     nlp = spacy.load(model_matcher[lang])
     doc = nlp(text)
@@ -45,17 +44,7 @@ def decompose(transcript_json, lang):
 
     transcript_json['topic'] = functions_matcher[lang]['topic'](text)
     transcript_json['task'] = functions_matcher[lang]['task'](transcript_json, doc, nlp, dep_matcher, dep_matches)
-    if lang=='ru':
-#         tokenizer, summary_model = load_model()
-        transcript_json['chapters'] = get_mbart_ru_summary(text, doc, nlp, dep_matches, lang)#, summary_model, tokenizer)
-    transcript_json = get_assembly_summary(transcript_json, nlp, dep_matcher, lang)
-#         text, doc, nlp, dep_matches, lang)
-#     transcript_json['summary'] = functions_matcher[lang]['summary'](
-#         text, doc, nlp, dep_matches, lang)
-    
-#     transcript_json['colored'] = {"BEEN DONE": get_BEEN_DONE(text, doc, nlp, dep_matches),
-#                                   "TODO": get_TODO(text, doc, nlp, dep_matches)}
-    
+    transcript_json = functions_matcher[lang]['summary'](transcript_json, nlp, dep_matcher, lang)
     
 
     return transcript_json

@@ -12,13 +12,13 @@ plan_phrases = {'ru': ['Теперь нужно', "Дальше нужно", "С
                 'en': ['We now need', "Now we need", "It's time", "Now it's time", "Next is", "Then is"]}
 
 rus_stopwords = ['аа', 'слушай', "говоришь", 'клево', 'ща', 'привет', 'приветик', "допустим", "смотри",
-                 'приду', 'секунду', 'разрешаю', 'нет', "типа", "угу", "ну", "чето", "да", "ааа"]
+                 'приду', 'секунду', 'разрешаю', 'нет', "типа", "угу", "ну", "чето", "да", "ааа", 'обсудить']
 pron_stopwords = ["нибудь", "который", "я",
                   "ты", "он", "она", "они", "кое", "что", "это"]
 verb_stopwords = ['told', 'said', 'had', 'loved', 'see', 'have', 'need','want', 'use','imagine', 'miss','tell','say','expect', 'consider', 'end']
 noun_stopwords = ['kind', 'microphone', 'screen', 'moment', 'thing', 'one','ones','what', 'that', 'it','kinds','sorts','which','mic','microphones', 'minute', 'minutes', 'whatever']
 discussed_phrases = {"en":["We have discussed"], "ru":["Обсуждали", "Обсудили"]}
-summary_junk = ['Начну с того', 'В сегодняшнем обзоре я расскажу о том']
+summary_junk = ['Начну с того', 'В сегодняшнем обзоре я расскажу о том', 'В сегодняшнем обзоре мы поговорим о том', 'В преддверии новогодних праздников я решил поделиться своим мнением о том','В последнее время я очень много пишу о том','В очередной раз напишу про то', 'В очередной раз я хочу рассказать тебе о том','Представляешь']
 
 patterns = {'imperative' : {
     'ru' : [{'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {"LOWER":{"NOT_IN": verb_stopwords},'POS': 'VERB',"IS_SENT_START":True, 'MORPH': {'IS_SUBSET': ['VerbForm=Inf','Tense=Pres']}}},
@@ -39,7 +39,7 @@ patterns = {'imperative' : {
         'ru' : [
             
     {'RIGHT_ID': 'advmod', 'RIGHT_ATTRS': {"LOWER": {"IN": ["нужно","надо","необходимо", "план", "планы", "планах","планирую","планируем", "собираюсь"]}}},
-    {'LEFT_ID': 'advmod', 'REL_OP': '>', 'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'DEP': {"IN":['csubj', "nmod"]},'POS': 'VERB'}},
+    {'LEFT_ID': 'advmod', 'REL_OP': '>', 'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'DEP': {"IN":['csubj', "nmod"]},'POS': 'VERB',"LOWER": {"NOT_IN":rus_stopwords}}},
     {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'object', 'RIGHT_ATTRS': {'DEP': {"IN":['obj', "conj"]}, 'POS': {"IN":["NOUN", "PRON", "VERB"]}, "LOWER": {"NOT_IN":pron_stopwords}}}
                 ],
         
@@ -116,7 +116,7 @@ patterns = {'imperative' : {
             
     {'RIGHT_ID': 'want', 'RIGHT_ATTRS': {"LOWER": {"IN": ["хотим", "хочу","думаю","могу"]}}},
     {'LEFT_ID': 'want', 'REL_OP': '>', 'RIGHT_ID': 'verb', 'RIGHT_ATTRS': {'DEP': 'xcomp','POS': 'VERB'}},
-    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'object', 'RIGHT_ATTRS': {'DEP': 'obj', 'POS': {"IN":["NOUN", "VERB"]}}}
+    {'LEFT_ID': 'verb', 'REL_OP': '>', 'RIGHT_ID': 'object', 'RIGHT_ATTRS': {'DEP': 'obj', 'POS': {"IN":["NOUN", "VERB"]},"LOWER": {"NOT_IN":rus_stopwords}}}
                 ],
         'en': [
             [{'RIGHT_ID': 'mod', 'RIGHT_ATTRS': {"LOWER": {"IN": ["want", "plan"]}}},
