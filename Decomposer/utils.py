@@ -8,8 +8,9 @@ from Decomposer.matcher import *
 from googletrans import Translator
 import json
 import openai
+import streamlit as st
+
 translator = Translator()
-openai.api_key = "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"
 
 kw_model = KeyBERT()
 morph = pymorphy2.MorphAnalyzer()
@@ -144,6 +145,7 @@ def colour(message, nlp, dep_matcher):
 
 def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
     
+    print(transcript_json)
     chapters = []
     for i, chapter in enumerate(transcript_json['chapters']):
         if i < 3: 
@@ -160,7 +162,8 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
     return transcript_json
 
 
-def request_gpt3_summary(text, prompt):
+def request_gpt3_summary(text, prompt, lang):
+    openai_api_key = random.choice(st.secrets['openai_api_keys'])
     try:
         response = openai.Completion.create(
           engine="davinci-instruct-beta",
@@ -171,9 +174,9 @@ def request_gpt3_summary(text, prompt):
           frequency_penalty=1
         )
 
-        print(response['choices'][0]['text'], translator.translate(response['choices'][0]['text'],src='en', dest='ru').text if translator.detect(response['choices'][0]['text']).lang=='en' else "")
+        print(response['choices'][0]['text'], translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else "")
 
-        summary = translator.translate(response['choices'][0]['text'],src='en', dest='ru').text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+        summary = translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
 
     except:
         response = openai.Completion.create(
@@ -184,7 +187,7 @@ def request_gpt3_summary(text, prompt):
           top_p=1,
           frequency_penalty=1
         )
-        summary = translator.translate(response['choices'][0]['text'],src='en', dest='ru').text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+        summary = translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
 
     return summary
 
@@ -194,8 +197,8 @@ def request_summary(transcript_json, nlp, dep_matcher, lang):
     chapters = [{'summary': '', 'headline': '','gist': '<gist>', 'text':'','message_list': []} for e in range(len(chunks))]
     i=0
     for text, message_list in chunks:
-            summary = request_gpt3_summary(text, prompt='\n\nSummarise in 5 lines or less')
-            headline = request_gpt3_summary(text, prompt='\n\nSummarise in 1 line')
+            summary = request_gpt3_summary(text, prompt='\n\nSummarise in 5 lines or less', lang=lang)
+            headline = request_gpt3_summary(text, prompt='\n\nSummarise in 1 line', lang=lang)
             if summary:
                 chapters[i]['summary']+=summary
                 chapters[i]['text']+=text
