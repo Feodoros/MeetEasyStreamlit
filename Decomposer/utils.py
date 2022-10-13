@@ -131,7 +131,7 @@ def colour(message, nlp, dep_matcher):
     coloured_list = []
     output = []
     for match in dep_matches:
-        if nlp.vocab[match[0]].text in ['task','need','want',"could_you", 'imperative', 'weekday', 'time', 'remind', 'strong_do']:
+        if nlp.vocab[match[0]].text in ['task','need','want', 'weekday', 'time', 'remind', 'strong_do']:
             matches = match[1]
             output+=sorted(matches)
 
