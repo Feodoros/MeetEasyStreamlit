@@ -163,7 +163,7 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
 
 
 def request_gpt3_summary(text, prompt, lang):
-    openai_api_key = random.choice(st.secrets['my_cool_secrets']['openai_api_keys'])
+    openai.api_key = random.choice(st.secrets['my_cool_secrets']['openai_api_keys'])
     try:
         response = openai.Completion.create(
           engine="davinci-instruct-beta",
