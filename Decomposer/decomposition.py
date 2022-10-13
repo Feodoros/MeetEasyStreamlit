@@ -5,20 +5,36 @@ from spacy.matcher import Matcher, DependencyMatcher
 from langdetect import detect
 import pyinflect
 
-functions_matcher = {'ru': {'topic': get_keywords,
+functions_matcher = {'ru': {'topic': lambda *args: [],
                             'summary': request_summary,
                             'task': get_personal_tasks,
                             },
                      'en': {'topic': get_en_keywords,
-                            'summary': get_en_summary,
+                            'summary': get_assembly_summary,
                             'task': get_personal_tasks,
                             },
-                     'de': {'topic': get_en_keywords,
-                            'summary': get_en_summary,
+                     'de': {'topic': lambda *args: [],
+                            'summary': request_summary,
                             'task': lambda *args: None,
                            },
-                     'es': {'topic': get_en_keywords,
-                            'summary': get_en_summary,
+                     'es': {'topic': lambda *args: [],
+                            'summary': request_summary,
+                            'task': lambda *args: None,
+                           },
+                     'fr': {'topic': lambda *args: [],
+                            'summary': request_summary,
+                            'task': lambda *args: None,
+                           }, 
+                     'it': {'topic': lambda *args: [],
+                            'summary': request_summary,
+                            'task': lambda *args: None,
+                           }, 
+                     'pt': {'topic': lambda *args: [],
+                            'summary': request_summary,
+                            'task': lambda *args: None,
+                           }, 
+                     'nl': {'topic': lambda *args: [],
+                            'summary': request_summary,
                             'task': lambda *args: None,
                            }
                     }
@@ -27,18 +43,25 @@ functions_matcher = {'ru': {'topic': get_keywords,
 def decompose(transcript_json, lang):
 
     text = process_json(transcript_json)
+    try:
+        nlp = spacy.load(model_matcher[lang])
+        doc = nlp(text)
+        dep_matcher = DependencyMatcher(vocab=nlp.vocab)
+        
+        for pattern_name in patterns.keys():
+            if type(patterns[pattern_name][lang][0]) == list:
+                dep_matcher.add(
+                    pattern_name, patterns=patterns[pattern_name][lang])
+            else:
+                dep_matcher.add(pattern_name, patterns=[
+                                patterns[pattern_name][lang]])
+    except:
+#         lang = 'en'
+        nlp = spacy.load(model_matcher['en'])
+        doc = nlp(text)
+        dep_matcher = DependencyMatcher(vocab=nlp.vocab)
 
-    nlp = spacy.load(model_matcher[lang])
-    doc = nlp(text)
-    dep_matcher = DependencyMatcher(vocab=nlp.vocab)
-
-    for pattern_name in patterns.keys():
-        if type(patterns[pattern_name][lang][0]) == list:
-            dep_matcher.add(
-                pattern_name, patterns=patterns[pattern_name][lang])
-        else:
-            dep_matcher.add(pattern_name, patterns=[
-                            patterns[pattern_name][lang]])
+    
 
     dep_matches = dep_matcher(doc)
 
