@@ -76,6 +76,7 @@ def main():
 
                 st.info('Identifying the language...')
                 lang = detect_lang(file_path)
+                print(lang)
 
                 if lang == 'ru':
                     # Transcribe meeting
@@ -86,6 +87,7 @@ def main():
                     try:
                         meeting_json = assembly_recognition.transcribe_meeting(
                             file_path)
+                        lang = meeting_json['language_code']
                     except Exception as e:
                         message = e
                         if hasattr(e, 'message'):
