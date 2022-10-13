@@ -56,7 +56,6 @@ def decompose(transcript_json, lang):
                 dep_matcher.add(pattern_name, patterns=[
                                 patterns[pattern_name][lang]])
     except:
-#         lang = 'en'
         nlp = spacy.load(model_matcher['en'])
         doc = nlp(text)
         dep_matcher = DependencyMatcher(vocab=nlp.vocab)

@@ -48,8 +48,8 @@ def get_tasks(transcript_json, doc, nlp, dep_matcher, dep_matches):
         pattern_name = match[0]
         matches = match[1]
         
-        if nlp.vocab[pattern_name].text == 'imperative':
-            tasks.append(doc[matches[0]].text.lower()+' '+join_dependant_tokens(1, doc, matches))
+#         if nlp.vocab[pattern_name].text == 'imperative':
+#             tasks.append(doc[matches[0]].text.lower()+' '+join_dependant_tokens(1, doc, matches))
 
         if nlp.vocab[pattern_name].text in ['task', 'need', 'want',"could_you"]:
             tasks.append(join_dependant_tokens(1, doc, matches))
