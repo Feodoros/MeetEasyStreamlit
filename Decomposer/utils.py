@@ -87,9 +87,9 @@ def get_personal_tasks(transcript_json, doc, nlp, dep_matcher, dep_matches):
                 
                 tasks.append(join_dependant_tokens(1, doc, matches))
     
-            if nlp.vocab[pattern_name].text == 'strong_do':
+#             if nlp.vocab[pattern_name].text == 'strong_do':
 
-                tasks.append(morph.parse(doc[matches[0]].text)[0].normal_form+' '+join_dependant_tokens(3, doc, matches))
+#                 tasks.append(morph.parse(doc[matches[0]].text)[0].normal_form+' '+join_dependant_tokens(3, doc, matches))
                          
             if nlp.vocab[pattern_name].text in ['weekday', 'time', 'remind']:
                 tasks.append(join_dependant_tokens(0, doc, matches).lower().replace('.',''))
@@ -162,7 +162,17 @@ def get_assembly_summary(transcript_json, nlp, dep_matcher, lang):
     return transcript_json
 
 
-def request_gpt3_summary(text, prompt, lang):
+def get_gpt3_tasks(transcript_json, doc, nlp, dep_matcher, dep_matches):
+    
+    print(transcript_json)
+    tasks = []
+    for i, chapter in enumerate(transcript_json['chapters']):
+        tasks+=chapter['tasks']
+
+    return tasks
+
+
+def request_gpt3_summary(text, prompt, lang, translate=True):
     openai.api_key = random.choice(st.secrets['my_cool_secrets']['openai_api_keys'])
     try:
         response = openai.Completion.create(
@@ -175,8 +185,12 @@ def request_gpt3_summary(text, prompt, lang):
         )
 
         print(response['choices'][0]['text'], translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else "")
-
-        summary = translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+        
+        if translate:
+            summary = translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+        
+        else:
+            summary = response['choices'][0]['text']
 
     except:
         response = openai.Completion.create(
@@ -187,28 +201,38 @@ def request_gpt3_summary(text, prompt, lang):
           top_p=1,
           frequency_penalty=1
         )
-        summary = translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+        if translate:
+            summary = translator.translate(response['choices'][0]['text'],src='en', dest=lang).text if translator.detect(response['choices'][0]['text']).lang=='en' else ""
+            
+        else:
+            summary = response['choices'][0]['text']
 
     return summary
 
 def request_summary(transcript_json, nlp, dep_matcher, lang):
     n=20
     chunks = [("\n".join([jsn['start_time']+" "+jsn['text'] for jsn in transcript_json['message_list'][i:i+n]]), transcript_json['message_list'][i:i+n]) for i in range(0, len(transcript_json['message_list']), n)]
-    chapters = [{'summary': '', 'headline': '','gist': '<gist>', 'text':'','message_list': []} for e in range(len(chunks))]
+    chapters = [{'summary': '', 'headline': '','gist': '<gist>','tasks':[], 'text':'','message_list': []} for e in range(len(chunks))]
     i=0
     for text, message_list in chunks:
+            tasks = []
             summary = request_gpt3_summary(text, prompt='\n\nSummarise in 5 lines or less', lang=lang)
             headline = request_gpt3_summary(text, prompt='\n\nSummarise in 1 line', lang=lang)
+            tasks_summary = request_gpt3_summary(text, prompt="\n\nSummarise as a list of tasks to do if it's a work related meeting, otherwise return an empty string", lang=lang, translate=False)
+            if '- ' in tasks_summary:
+                tasks += tasks_summary.split('- ')
             if summary:
                 chapters[i]['summary']+=summary
                 chapters[i]['text']+=text
                 chapters[i]['message_list']+=message_list
                 chapters[i]['headline']=headline
+                chapters[i]['tasks']+=tasks
                 i+=1
 
             else:
                 chapters[i]['text']+=text
                 chapters[i]['message_list']+=message_list
+                chapters[i]['tasks']+=tasks
 
     transcript_json['chapters'] = chapters[:i] 
     for chapter in transcript_json['chapters']:
