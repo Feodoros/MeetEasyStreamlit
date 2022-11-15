@@ -122,7 +122,7 @@ patterns = {'imperative' : {
             [{'RIGHT_ID': 'mod', 'RIGHT_ATTRS': {"LOWER": {"IN": ["want", "plan"]}}},
                 {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'x_comp', 'RIGHT_ATTRS': {'DEP': 'xcomp','POS': 'VERB',"LOWER":{"NOT_IN": verb_stopwords}}},
                 {'LEFT_ID': 'x_comp', 'REL_OP': '>', 'RIGHT_ID': 'part', 'RIGHT_ATTRS': {'DEP': 'aux','POS': 'PART'}},
-                {'LEFT_ID': 'x_comp', 'REL_OP': '>', 'RIGHT_ID': 'c_comp', 'RIGHT_ATTRS': {'DEP': {'IN' : ['ccomp','dobj']}, 'POS': {"IN":["PRON", "NOUN", "VERB"]},"LOWER": {"NOT_IN":noun_stopwords}}},
+                {'LEFT_ID': 'x_comp', 'REL_OP': '>', 'RIGHT_ID': 'c_comp', 'RIGHT_ATTRS': {'DEP': {'IN' : ['ccomp','dobj']}, 'POS': {"IN":["NOUN", "VERB"]},"LOWER": {"NOT_IN":noun_stopwords}}},
                 {'LEFT_ID': 'mod', 'REL_OP': '>', 'RIGHT_ID': 'subject', 'RIGHT_ATTRS': {'DEP': 'nsubj','LOWER': {"NOT_IN":["you","it","they","who"]}, 'POS': {"IN":["PRON", "PROPN"]}}},
 #                 {'LEFT_ID': 'mod', 'REL_OP': ';', 'RIGHT_ID': 'any', 'RIGHT_ATTRS': {'LOWER':{"NOT_IN" : ["n't", "not"]}}}],
             
