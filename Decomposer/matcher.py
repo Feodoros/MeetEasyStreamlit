@@ -1,3 +1,22 @@
+language_codes = {
+    'en': 'English',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+    'it': 'Italian',
+    'nl': 'Dutch',
+    'pt': 'Portuguese',
+    'ru': 'Russian',
+    'ja': 'Japanese',
+    'zh': 'Chinese',
+    'ko': 'Korean',
+    'ar': 'Arabic',
+    'he': 'Hebrew',
+    'el': 'Greek',
+    'tr': 'Turkish',
+    'th': 'Thai'
+}
+
 model_matcher = {'ru': 'ru_core_news_lg',
                  'en': 'en_core_web_sm'}
 

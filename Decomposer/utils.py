@@ -8,6 +8,9 @@ from Decomposer.matcher import *
 from googletrans import Translator
 import json
 import openai
+import traceback
+import sys
+import math
 import streamlit as st
 
 translator = Translator()
@@ -210,6 +213,7 @@ def request_gpt3_summary(text, prompt, lang, translate=True):
     return summary
 
 def request_summary(transcript_json, nlp, dep_matcher, lang):
+    
     n=20
     chunks = [("\n".join([jsn['start_time']+" "+jsn['text'] for jsn in transcript_json['message_list'][i:i+n]]), transcript_json['message_list'][i:i+n]) for i in range(0, len(transcript_json['message_list']), n)]
     chapters = [{'summary': '', 'headline': '','gist': '<gist>','tasks':[], 'text':'','message_list': []} for e in range(len(chunks))]
@@ -240,6 +244,119 @@ def request_summary(transcript_json, nlp, dep_matcher, lang):
             message['coloured'] = colour(message, nlp, dep_matcher)
 
     return transcript_json
+
+
+def request_all(transcript_json, lang_code):
+    
+    openai.api_key = random.choice(st.secrets['my_cool_secrets']['openai_api_keys'])
+    
+    lang = language_codes.get(lang_code, 'unknown')
+    
+    prompt_question = "Give a filled json in {}".format(lang)
+    prompt_json = {"gist": "", "headline": "" , "follow-up-summary":"", "tasks-to-do":[], "keywords":[]}
+    
+    prompt=translator.translate(prompt_question,src='en', dest=lang_code).text+' '+json.dumps(prompt_json)
+    
+    n=int(math.log(len('\n'.join(["- "+jsn['text'] for jsn in transcript_json['message_list']])), 7))
+          
+    chunks = [('\n'.join(["- "+jsn['text'] for jsn in chunk]), [jsn for jsn in chunk]) for chunk in split_list(transcript_json['message_list'], n)]
+    chapters = [{'gist': '', 'headline': '','summary': '', 'tasks':[], 'text':'','message_list': []} for e in range(len(chunks))]
+    transcript_json['topic'] = []
+    transcript_json['task'] = []
+    
+    i=0
+    for text, message_list in chunks:
+        
+        chapters[i]['text']+=text
+        chapters[i]['message_list']+=message_list
+        try: 
+            response = openai.Completion.create(prompt=text+"\n\n"+prompt, engine='text-davinci-003', temperature=0.0, top_p=1.0, max_tokens=1300,frequency_penalty=1)
+            print(response['choices'][0]['text'])
+            
+            # Handle the decodable replies like these
+            """{"headline": "Discussion on Cost Items, Copywriting and Sales Team", 
+                "follow-up-summary": "Speakers A, B and C discussed the need to adjust pricing, eliminate copywriting costs...
+                "tasks-to-do": ["Adjust pricing", "Eliminate copywriting costs"], 
+                "keywords": ["cost items","copywriting","sales team","target market"]}"""
+            parsed_json = json.loads(response['choices'][0]['text'].replace("“", '"').replace("”", '"'))
+            chapters[i]['gist']=parsed_json["gist"]
+            chapters[i]['headline']=parsed_json["headline"]
+            chapters[i]['summary']+=parsed_json["follow-up-summary"]
+            transcript_json['task']+=parsed_json["tasks-to-do"]
+            transcript_json['topic'].append(parsed_json["keywords"][0])
+            i+=1
+
+        except json.JSONDecodeError as e:
+            
+            # Handle the JSONDecodeError for replies like these
+            """Headline: Financial Reporting and Investment Discussed 
+               Follow-up Summary: The discussion focused on the need for accurate financial reporting ...
+               Tasks To Do: Schedule a workshop with Irina in January to create a template for financial reporting;
+               Keywords: Financial Reporting, Investment, Invoices, Transparency"""
+            print(f'Error decoding JSON: {e}')
+            parsed_json = {}
+            content_id = 0
+            for content in response['choices'][0]['text'].split('\n'):
+                try:
+                    potential_key, potential_value = content.split(': ')
+                    if prompt_json.keys()[content_id]=="tasks-to-do":
+                        parsed_json[prompt_json.keys()[content_id]] = potential_value.split(';')
+                    elif prompt_json.keys()[content_id]=="keywords":
+                        parsed_json[prompt_json.keys()[content_id]] = potential_value.split(',')
+                    else:
+                        parsed_json[prompt_json.keys()[content_id]] = potential_value
+                    content_id+=1
+                except:
+                      pass
+            
+            if parsed_json:
+                chapters[i]['gist']=parsed_json["gist"]
+                chapters[i]['headline']=parsed_json["headline"]
+                chapters[i]['summary']+=parsed_json["follow-up-summary"]
+                transcript_json['task']+=parsed_json["tasks-to-do"]
+                transcript_json['topic'].append(parsed_json["keywords"][0])
+                i+=1
+                    
+        except Exception as e:
+            # Print the error message
+            print(e, file=sys.stderr)
+            # Print the stack trace
+            print(traceback.format_exc(), file=sys.stderr)
+
+    transcript_json['chapters'] = chapters[:i]
+    for chapter in transcript_json['chapters']:
+        for message in chapter['message_list']:
+            message['coloured'] = [message['text']]
+
+    return transcript_json
+          
+
+def split_list(l, n):
+    """
+    a utility function that is used to split a given list into smaller lists of a specified size. 
+    :list a:
+    :an integer n: 
+    :return a generator that yields n smaller lists, each containing a portion of the elements from the input list
+
+    Here is an example of how the split_list function could be used:
+
+    l = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    n = 3
+
+    for small_list in split_list(l, n):
+        print(small_list)
+
+    # Output:
+    # [1, 2, 3, 4]
+    # [5, 6, 7]
+    # [8, 9, 10]
+
+    """
+    k, m = divmod(len(l), n)
+    return (
+        l[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)]
+        for i in range(min(len(l), n))
+    )
 
 
 def get_en_summary(text, doc, nlp, dep_matches, lang):
